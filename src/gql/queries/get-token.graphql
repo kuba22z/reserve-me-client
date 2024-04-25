@@ -1,0 +1,3 @@
+query getToken($code: String!){
+    accessToken(authorizationCode: $code) {access_token,expires_in,token_type,refresh_token}
+}

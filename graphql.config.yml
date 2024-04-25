@@ -1,0 +1,24 @@
+overwrite: true
+schema: "http://localhost:3000/graphql"
+generates:
+  src/gql/__generated__/types.tsx:
+    documents: 'src/**/*.{tsx,gql,graphql}'
+    plugins:
+      - "typescript"
+#      - "typescript-react-apollo" TODO this plugin generates a document which is exported and it collides with gql/queries's typed-document
+#     - "typescript-operations"
+  gql/queries:
+    documents: 'src/gql/queries/*.graphql'
+    preset: "near-operation-file"
+    presetConfig: { extension: '.generated.tsx', baseTypesPath: '~@/gql/__generated__/types' }
+    plugins:
+      - "typescript-operations"
+      - "typed-document-node"
+  src/gql/__generated__/graphql.schema.json:
+    plugins:
+      - "introspection"
+
+config:
+  constEnums: true
+  immutableTypes: true
+  avoidOptionals: true,
