@@ -1,5 +1,0 @@
-query getClients {
-    clientsByGroup {
-        name,userName,phoneNumber
-    }
-}

@@ -1,0 +1,5 @@
+query getUser {
+    user {
+     phoneNumber name userName groups
+    }
+}

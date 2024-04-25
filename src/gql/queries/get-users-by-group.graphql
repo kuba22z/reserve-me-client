@@ -1,0 +1,5 @@
+query getUsersByGroup($group: CognitoGroups!) {
+    usersByGroup(group: $group) {
+        name,userName,phoneNumber
+    }
+}

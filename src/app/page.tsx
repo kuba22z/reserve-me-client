@@ -2,7 +2,7 @@ import styles from "./page.module.css";
 import {Suspense} from "react";
 import {getClient} from "@/gql/client";
 import {GetTokenDocument} from "@/gql/queries/get-token.generated";
-import {GetClientsDocument} from "@/gql/queries/get-clients.generated";
+import {GetUserDocument} from "@/gql/queries/get-user.generated";
 
 function MissingAuthorizationCodeFallback() {
   return <>Fail</>
@@ -50,18 +50,18 @@ const getAllClients = async (token:string) =>  await fetch('http://localhost:300
         throw new Error('Failed to fetch data')
     });
 
-const getAllClientsGraphql = async (token:string) =>  {
+const getUser = async (token:string) =>  {
     const {data,error,errors,networkStatus} = await getClient().query({
-        query: GetClientsDocument, context: { headers: {authorization: 'Bearer ' + token}}
+        query: GetUserDocument, context: { headers: {authorization: 'Bearer ' + token}}
     })
-    console.log(data.clientsByGroup)
-    return data.clientsByGroup
+    console.log(data.user)
+    return data.user
 };
 
 export default async function Home({searchParams}: {
   searchParams: { code: string | undefined };
 }) {
-  const data = searchParams.code ? getTokenGraphql(searchParams.code).then(a => a ? getAllClientsGraphql(a.accessToken.access_token): null) : null
+  const data = searchParams.code ? getTokenGraphql(searchParams.code).then(a => a ? getUser(a.accessToken.idToken): null) : null
     const client = await data;
 
   return (
