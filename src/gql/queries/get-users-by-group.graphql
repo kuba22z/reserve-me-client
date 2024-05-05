@@ -1,4 +1,4 @@
-query getUsersByGroup($group: CognitoGroups!) {
+query getUsersByGroup($group: CognitoGroupDto!) {
     usersByGroup(group: $group) {
         name,userName,phoneNumber
     }
