@@ -15,6 +15,9 @@ const authMiddleware = new ApolloLink((operation, forward) => {
     return forward(operation);
 })
 
+// https://medium.com/@cloudapp_dev/nextjs-13-5-6-complete-example-typescript-app-router-contentful-and-a-lot-more-0b43c12cac9f
+// alternative https://nouance.io/articles/how-to-use-graphql-codegen-with-payload-and-react-query-in-nextjs
+// https://plainenglish.io/community/next-js-app-router-graphql-codegen-and-tanstack-query
 export const { getClient } = registerApolloClient(() => {
     return new ApolloClient({
         cache: new InMemoryCache(),
