@@ -1,12 +1,8 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import { ApolloWrapper } from '@/gql/apollo-wrapper'
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
-import theme from '@/theme'
-import { Experimental_CssVarsProvider } from '@mui/material/styles'
-
-const inter = Inter({ subsets: ['latin'] })
+import { ThemeProvider } from '@/components/core/ThemeProvider'
+import { LocalizationProvider } from '@/components/core/localization-provider'
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -20,16 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <AppRouterCacheProvider>
-          <Experimental_CssVarsProvider theme={theme}>
-            <ApolloWrapper>
-              {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-              {/*<CssBaseline />*/}
-              {children}
-            </ApolloWrapper>
-          </Experimental_CssVarsProvider>
-        </AppRouterCacheProvider>
+      <body>
+        <ApolloWrapper>
+          <LocalizationProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </LocalizationProvider>
+        </ApolloWrapper>
       </body>
     </html>
   )

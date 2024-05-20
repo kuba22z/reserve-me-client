@@ -5,12 +5,24 @@ import { CognitoGroupDto, LocationDto } from '@/gql/__generated__/types'
 import { GetUsersDocument } from '@/gql/queries/get-users.generated'
 import { SignOutDocument } from '@/gql/queries/sign-out.generated'
 import { cookies } from 'next/headers'
-import { Box, Container, FormControl, Link, Typography } from '@mui/material'
+import RestoreIcon from '@mui/icons-material/Restore'
+import FavoriteIcon from '@mui/icons-material/Favorite'
+import LocationOnIcon from '@mui/icons-material/LocationOn'
+import {
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Container,
+  FormControl,
+  Link,
+  Typography,
+} from '@mui/material'
 import { CookieToken } from '@/app/utils/auth/cookie-token'
 import NextLink from 'next/link'
 import MyButton from '@/components/MyButton'
 import { UpdateLocationDocument } from '@/gql/queries/update-location.generated'
 import { GetLocationDocument } from '@/gql/queries/get-location.generated'
+import React from 'react'
 
 function MissingAuthorizationCodeFallback() {
   return <>Fail</>
@@ -119,6 +131,11 @@ export default async function Home({
           <MyButton onClick={updateLocation}>update Location</MyButton>
         </FormControl>
       </Box>
+      <BottomNavigation showLabels>
+        <BottomNavigationAction label="Recents" icon={<RestoreIcon />} />
+        <BottomNavigationAction label="Favorites" icon={<FavoriteIcon />} />
+        <BottomNavigationAction label="Nearby" icon={<LocationOnIcon />} />
+      </BottomNavigation>
     </Container>
   )
 }
