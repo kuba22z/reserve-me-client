@@ -1,12 +1,16 @@
-import { Suspense } from 'react'
 import { getClient } from '@/gql/client'
 import { GetUserDocument } from '@/gql/queries/get-user.generated'
 import { GetUsersByGroupDocument } from '@/gql/queries/get-users-by-group.generated'
-import { CognitoGroupDto } from '@/gql/__generated__/types'
+import { CognitoGroupDto, LocationDto } from '@/gql/__generated__/types'
 import { GetUsersDocument } from '@/gql/queries/get-users.generated'
 import { SignOutDocument } from '@/gql/queries/sign-out.generated'
 import { cookies } from 'next/headers'
+import { Box, Container, FormControl, Link, Typography } from '@mui/material'
 import { CookieToken } from '@/app/utils/auth/cookie-token'
+import NextLink from 'next/link'
+import MyButton from '@/components/MyButton'
+import { UpdateLocationDocument } from '@/gql/queries/update-location.generated'
+import { GetLocationDocument } from '@/gql/queries/get-location.generated'
 
 function MissingAuthorizationCodeFallback() {
   return <>Fail</>
@@ -64,21 +68,57 @@ const getUsers = async (token: string) => {
   return data.users
 }
 
+const updateLocation = async () => {
+  'use server'
+  const { data } = await getClient().mutate({
+    mutation: UpdateLocationDocument,
+    variables: { location: { id: 1, city: 'my New213213 City' } },
+    refetchQueries: [{ query: GetLocationDocument }],
+  })
+  return data
+}
+
+const getLocations = async (): Promise<ReadonlyArray<Partial<LocationDto>>> => {
+  const { data, error, errors, networkStatus } = await getClient().query({
+    query: GetLocationDocument,
+  })
+  console.log(data)
+  return data.locations
+}
+
 export default async function Home({
   searchParams,
 }: {
   searchParams: { code: string | undefined }
 }) {
   const user = await getUser().catch((a) => console.log(a))
+  const locations = await getLocations().catch((a) => console.log(a))
 
   return (
-    <Suspense fallback={<MissingAuthorizationCodeFallback />}>
-      <div>{user ? user.userName : ''}</div>
-      <div>Access token: {CookieToken.get('accessToken')}</div>
-
-      <form action={logout}>
-        <button type={'submit'}>logout</button>
-      </form>
-    </Suspense>
+    <Container maxWidth="lg">
+      <Box
+        sx={{
+          my: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
+          Material UI - Next.js App Router example in TypeScript
+        </Typography>
+        <Link href="/about" color="secondary" component={NextLink}>
+          Go to the about page
+        </Link>
+        <div>{user ? user.userName : ''}</div>
+        <div>{locations ? locations.map((a) => a.city + ' ') : ''}</div>
+        <div>Access token: {CookieToken.get('accessToken')}</div>{' '}
+        <FormControl>
+          <MyButton onClick={logout}>logout</MyButton>
+          <MyButton onClick={updateLocation}>update Location</MyButton>
+        </FormControl>
+      </Box>
+    </Container>
   )
 }

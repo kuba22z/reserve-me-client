@@ -1,0 +1,5 @@
+mutation UpdateLocation($location: UpdateLocationDto!){
+    updateLocation(location: $location) {
+            id
+        }
+}
