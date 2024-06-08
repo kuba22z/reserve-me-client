@@ -1,5 +1,5 @@
 query getLocation {
     locations {
-        city
+        city id city postalCode houseNumber name street
     }
 }

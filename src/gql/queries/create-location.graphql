@@ -1,0 +1,15 @@
+mutation CreateLocation($location: CreateLocationDto!){
+    createLocation(location: $location) {
+        id,postalCode, city,street, houseNumber name
+    }
+}
+
+fragment locationFragment on LocationDto {
+    id
+    postalCode
+    name
+    houseNumber
+    postalCode
+    city
+    street
+}

@@ -20,9 +20,13 @@ import {
 import { CookieToken } from '@/app/utils/auth/cookie-token'
 import NextLink from 'next/link'
 import MyButton from '@/components/MyButton'
-import { UpdateLocationDocument } from '@/gql/queries/update-location.generated'
 import { GetLocationDocument } from '@/gql/queries/get-location.generated'
 import React from 'react'
+import { addLocation } from '@/operations/addLocation'
+import { Locations } from '@/components/Locations'
+import { LocationsVar } from '@/components/LocationsVar'
+import MyButtonStore from '@/components/MyButtonStore'
+import { LocationsStore } from '@/components/LocationsStore'
 
 function MissingAuthorizationCodeFallback() {
   return <>Fail</>
@@ -80,13 +84,9 @@ const getUsers = async (token: string) => {
   return data.users
 }
 
-const updateLocation = async () => {
+const createLocation = async () => {
   'use server'
-  const { data } = await getClient().mutate({
-    mutation: UpdateLocationDocument,
-    variables: { location: { id: 1, city: 'my New213213 City' } },
-    refetchQueries: [{ query: GetLocationDocument }],
-  })
+  const { data } = await addLocation()
   return data
 }
 
@@ -94,7 +94,6 @@ const getLocations = async (): Promise<ReadonlyArray<Partial<LocationDto>>> => {
   const { data, error, errors, networkStatus } = await getClient().query({
     query: GetLocationDocument,
   })
-  console.log(data)
   return data.locations
 }
 
@@ -105,7 +104,6 @@ export default async function Home({
 }) {
   const user = await getUser().catch((a) => console.log(a))
   const locations = await getLocations().catch((a) => console.log(a))
-
   return (
     <Container maxWidth="lg">
       <Box
@@ -124,11 +122,17 @@ export default async function Home({
           Go to the about page
         </Link>
         <div>{user ? user.userName : ''}</div>
-        <div>{locations ? locations.map((a) => a.city + ' ') : ''}</div>
+        <Locations locations={locations}></Locations>
+        <h3>Location Var</h3>
+        <LocationsVar></LocationsVar>
+        <h3>Location Store</h3>
+        <LocationsStore></LocationsStore>
         <div>Access token: {CookieToken.get('accessToken')}</div>{' '}
         <FormControl>
-          <MyButton onClick={logout}>logout</MyButton>
-          <MyButton onClick={updateLocation}>update Location</MyButton>
+          {/*<MyButton onClick={logout}>logout</MyButton>*/}
+          <MyButton onClick={createLocation}>create Location</MyButton>
+          {/*<MyButtonClient>create Location</MyButtonClient>*/}
+          <MyButtonStore>create Location 2</MyButtonStore>
         </FormControl>
       </Box>
       <BottomNavigation showLabels>

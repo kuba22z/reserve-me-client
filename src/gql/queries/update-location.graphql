@@ -1,5 +1,10 @@
 mutation UpdateLocation($location: UpdateLocationDto!){
-    updateLocation(location: $location) {
-            id
-        }
+    updateLocation(location: $location){
+        id
+        city
+        postalCode
+        __typename
+        houseNumber
+        street
+    }
 }
