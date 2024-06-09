@@ -11,8 +11,8 @@ import {
   TokenRequestDto,
 } from './gql/__generated__/types'
 import { GetTokenDocument } from '@/gql/queries/get-token.generated'
-import { GetLoginUrlDocument } from '@/gql/queries/get-login.generated'
 import { getClientNoAuth } from '@/gql/clientNoAuth'
+import { externalUrl } from '@/config'
 
 const PUBLIC_FILE = /\.(.*)$/
 
@@ -34,10 +34,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   const refreshToken = CookieToken.get('refreshToken')
+
   if (!refreshToken) {
     console.log('refreshToken is null')
-    const url = await getLoginUrl()
-    return NextResponse.redirect(url)
+    return NextResponse.redirect(externalUrl.login)
   }
   const tokens = await requestToken(refreshToken)
   return responseWithAccessToken(request, tokens)
@@ -70,13 +70,6 @@ export const getTokenGraphql = async (tokenRequest: TokenRequestDto) => {
     variables: { tokenRequest },
   })
   return data.accessToken
-}
-
-export const getLoginUrl = async () => {
-  const { data, error, errors, networkStatus } = await getClientNoAuth().query({
-    query: GetLoginUrlDocument,
-  })
-  return data.login
 }
 
 /**

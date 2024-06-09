@@ -1,6 +1,5 @@
 import * as React from 'react'
 import RouterLink from 'next/link'
-import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import ListItemIcon from '@mui/material/ListItemIcon'
@@ -13,6 +12,7 @@ import { SignOut as SignOutIcon } from '@phosphor-icons/react/dist/ssr/SignOut'
 import { User as UserIcon } from '@phosphor-icons/react/dist/ssr/User'
 
 import { paths } from '@/paths'
+import { logout } from '@/operations/logout'
 
 export interface UserPopoverProps {
   anchorEl: Element | null
@@ -26,9 +26,6 @@ export function UserPopover({
   open,
 }: UserPopoverProps): React.JSX.Element {
   // const { checkSession } = useUser()
-
-  const router = useRouter()
-
   // const handleSignOut = React.useCallback(async (): Promise<void> => {
   //   try {
   //     const { error } = await authClient.signOut()
@@ -88,7 +85,7 @@ export function UserPopover({
           </ListItemIcon>
           Profile
         </MenuItem>
-        <MenuItem>
+        <MenuItem onClick={() => logout()}>
           <ListItemIcon>
             <SignOutIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>

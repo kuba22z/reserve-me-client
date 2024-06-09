@@ -4,6 +4,7 @@ import { GrantTypeDto, TokenRequestDto } from '@/gql/__generated__/types'
 import { redirect } from 'next/navigation'
 import { getClientNoAuth } from '@/gql/clientNoAuth'
 import { CookieToken } from '@/app/utils/auth/cookie-token'
+import { paths } from '@/paths'
 
 export async function GET(req: NextApiRequest) {
   if (!req.url) {
@@ -15,7 +16,7 @@ export async function GET(req: NextApiRequest) {
     grantType: GrantTypeDto.AuthorizationCode,
   })
   CookieToken.setTokenDto(tokens)
-  redirect('/')
+  redirect(paths.dashboard.overview)
 }
 
 export const getTokenGraphql = async (tokenRequest: TokenRequestDto) => {

@@ -21,6 +21,10 @@ export namespace CookieToken {
     return cookies().get(key)?.value
   }
 
+  export const remove = (key: CookieTokenKey) => {
+    return cookies().delete(key)
+  }
+
   export const setTokenDtoInResponse = (
     response: NextResponse,
     credentials: TokenDto

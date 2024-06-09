@@ -8,7 +8,6 @@ export function LocationsStore() {
   const getLocations = useLocationStore((state) => state.getLocations)
 
   useEffect(() => {
-    console.log('sd')
     getLocations()
   }, [])
 
