@@ -1,5 +1,5 @@
 query getUsersByGroup($group: CognitoGroupDto!) {
     usersByGroup(group: $group) {
-        name,userName,phoneNumber
+        id,name,userName,phoneNumber,groups
     }
 }
