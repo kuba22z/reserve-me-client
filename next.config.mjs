@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  // reactStrictMode must be false to fix a bug in react-big-calendar
+  reactStrictMode: false,
   webpack: (config) => {
     // this will override the experiments
     config.experiments = { ...config.experiments, topLevelAwait: true };
