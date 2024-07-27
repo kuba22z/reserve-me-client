@@ -1,0 +1,9 @@
+mutation createMeeting($meeting: CreateMeetingDto!){
+    createMeeting(meeting: $meeting){
+            id,userNames,discount,priceExcepted,priceFinal,priceFull,repeatRate,createdAt,updatedAt,createdByExternalRefId, schedules {
+                id, startDate, endDate,canceled,locationId,location {
+                    city,postalCode,id,houseNumber,street,name
+                }
+            }
+    }
+}

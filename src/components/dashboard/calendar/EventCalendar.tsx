@@ -23,7 +23,7 @@ import EventInfoModal from './EventInfoModal'
 import { AddTodoModal } from './AddTodoModal'
 import AddDatePickerEventModal from './AddDatePickerEventModal'
 import 'moment/locale/de'
-import { MeetingDto } from '@/gql/__generated__/types'
+import { CreateMeetingDto, MeetingDto } from '@/gql/__generated__/types'
 
 // const locales = {
 //   "en-US": enUS,
@@ -73,10 +73,11 @@ const initialDatePickerEventFormData: DatePickerEventFormData = {
 }
 
 interface EventCalendarProps {
-  meetings: MeetingDto[]
+  meetings: ReadonlyArray<MeetingDto>
+  createMeeting: (meeting: CreateMeetingDto) => Promise<MeetingDto>
 }
 
-function EventCalendar({ meetings }: EventCalendarProps) {
+function EventCalendar({ meetings, createMeeting }: EventCalendarProps) {
   const [openSlot, setOpenSlot] = useState(false)
   const [openDatepickerModal, setOpenDatepickerModal] = useState(false)
   const [openTodoModal, setOpenTodoModal] = useState(false)
@@ -86,7 +87,23 @@ function EventCalendar({ meetings }: EventCalendarProps) {
 
   const [eventInfoModal, setEventInfoModal] = useState(false)
 
-  const [events, setEvents] = useState<IEventInfo[]>([])
+  const [events, setEvents] = useState<IEventInfo[]>(
+    meetings
+      .filter((m) => m.schedules && m.schedules.length > 0)
+      .map((m) => {
+        const schedule = m.schedules![0]
+        const userNames = m.userNames.join(',')
+        return {
+          start: new Date(schedule.startDate),
+          end: new Date(schedule.endDate),
+          allDay: false,
+          description: userNames,
+          todoId: m.id.toString(),
+          _id: m.id.toString(),
+          resource: null,
+        }
+      })
+  )
   const [todos, setTodos] = useState<ITodo[]>([])
 
   const [eventFormData, setEventFormData] = useState<EventFormData>(
@@ -118,7 +135,6 @@ function EventCalendar({ meetings }: EventCalendarProps) {
 
   const onAddEvent = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-
     const data: IEventInfo = {
       ...eventFormData,
       _id: generateId(),
@@ -126,10 +142,20 @@ function EventCalendar({ meetings }: EventCalendarProps) {
       end: currentEvent?.end,
     }
 
-    const newEvents = [...events, data]
+    createMeeting({
+      priceExcepted: 0,
+      createdByExternalRefId: '1',
+      schedule: {
+        startDate: currentEvent?.start,
+        endDate: currentEvent?.end,
+        locationId: 585,
+      },
+    }).then((meeting) => {
+      const newEvents = [...events, data]
 
-    setEvents(newEvents)
-    handleClose()
+      setEvents(newEvents)
+      handleClose()
+    })
   }
 
   const onAddEventFromDatePicker = (e: MouseEvent<HTMLButtonElement>) => {
@@ -145,19 +171,31 @@ function EventCalendar({ meetings }: EventCalendarProps) {
       return date
     }
 
-    const data: IEventInfo = {
-      ...datePickerEventFormData,
-      _id: generateId(),
-      start: setMinToZero(datePickerEventFormData.start),
-      end: datePickerEventFormData.allDay
-        ? addHours(datePickerEventFormData.start, 12)
-        : setMinToZero(datePickerEventFormData.end),
-    }
+    createMeeting({
+      priceExcepted: 0,
+      createdByExternalRefId: '1',
+      schedule: {
+        startDate: setMinToZero(datePickerEventFormData.start),
+        endDate: datePickerEventFormData.allDay
+          ? addHours(datePickerEventFormData.start, 12)
+          : setMinToZero(datePickerEventFormData.end),
+        locationId: 585,
+      },
+    }).then((meeting) => {
+      const data: IEventInfo = {
+        ...datePickerEventFormData,
+        _id: meeting.id.toString(),
+        start: setMinToZero(datePickerEventFormData.start),
+        end: datePickerEventFormData.allDay
+          ? addHours(datePickerEventFormData.start, 12)
+          : setMinToZero(datePickerEventFormData.end),
+      }
 
-    const newEvents = [...events, data]
+      const newEvents = [...events, data]
 
-    setEvents(newEvents)
-    setDatePickerEventFormData(initialDatePickerEventFormData)
+      setEvents(newEvents)
+      setDatePickerEventFormData(initialDatePickerEventFormData)
+    })
   }
 
   const onDeleteEvent = () => {
