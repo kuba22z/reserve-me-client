@@ -29,7 +29,7 @@ const AddEventModal = ({
   onAddEvent,
   todos,
 }: IProps) => {
-  const { description } = eventFormData
+  const { selectedUserNames, users } = eventFormData
 
   const onClose = () => handleClose()
 
@@ -57,8 +57,9 @@ const AddEventModal = ({
         <Box component="form">
           <TextField
             name="description"
-            value={description}
+            value={''}
             margin="dense"
+            required={false}
             id="description"
             label="Description"
             type="text"
@@ -67,13 +68,20 @@ const AddEventModal = ({
             onChange={onChange}
           />
           <Autocomplete
-            onChange={handleTodoChange}
-            disablePortal
-            id="combo-box-demo"
-            options={todos}
-            sx={{ marginTop: 4 }}
-            getOptionLabel={(option) => option.title}
-            renderInput={(params) => <TextField {...params} label="Todo" />}
+            multiple
+            id="select-user-for-meeting"
+            options={users.map((u) => u)}
+            getOptionLabel={(option) => option.name}
+            getOptionKey={(option) => option.userName}
+            onChange={(event, value, reason, details) =>
+              setEventFormData((prevState) => ({
+                ...prevState,
+                selectedUserNames: value.map((u) => u.userName),
+              }))
+            }
+            renderInput={(params) => (
+              <TextField {...params} variant="standard" label="Names" />
+            )}
           />
         </Box>
       </DialogContent>
@@ -82,7 +90,7 @@ const AddEventModal = ({
           Cancel
         </Button>
         <Button
-          disabled={description === ''}
+          disabled={selectedUserNames.length === 0}
           color="success"
           onClick={onAddEvent}
         >

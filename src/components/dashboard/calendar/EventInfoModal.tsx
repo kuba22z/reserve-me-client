@@ -1,12 +1,12 @@
-import { SetStateAction, MouseEvent, Dispatch } from 'react'
+import { Dispatch, MouseEvent, SetStateAction } from 'react'
 import {
+  Box,
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button,
-  Box,
   Typography,
 } from '@mui/material'
 import { IEventInfo } from './EventCalendar'
@@ -38,7 +38,9 @@ const EventInfoModal = ({
             color="text.secondary"
             gutterBottom
           >
-            {currentEvent?.description}
+            {currentEvent && currentEvent.users
+              ? currentEvent.users.map((a) => a.name).join(',')
+              : ''}
           </Typography>
         </DialogContentText>
         <Box component="form"></Box>

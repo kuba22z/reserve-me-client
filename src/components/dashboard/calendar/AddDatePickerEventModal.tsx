@@ -1,18 +1,18 @@
-import React, { Dispatch, MouseEvent, SetStateAction, ChangeEvent } from 'react'
+import React, { ChangeEvent, Dispatch, MouseEvent, SetStateAction } from 'react'
 import {
-  TextField,
+  Autocomplete,
+  Box,
+  Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button,
-  Autocomplete,
-  Box,
-  Checkbox,
+  TextField,
   Typography,
 } from '@mui/material'
-import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers'
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { DatePickerEventFormData, ITodo } from './EventCalendar'
 
@@ -33,7 +33,7 @@ const AddDatePickerEventModal = ({
   onAddEvent,
   todos,
 }: IProps) => {
-  const { description, start, end, allDay } = datePickerEventFormData
+  const { users, start, end, allDay } = datePickerEventFormData
 
   const onClose = () => {
     handleClose()
@@ -66,7 +66,7 @@ const AddDatePickerEventModal = ({
         return true
       }
     }
-    if (description === '' || start === null || checkend()) {
+    if (users.length === 0 || start === null || checkend()) {
       return true
     }
     return false
@@ -82,14 +82,31 @@ const AddDatePickerEventModal = ({
         <Box component="form">
           <TextField
             name="description"
-            value={description}
+            value={''}
             margin="dense"
+            required={false}
             id="description"
             label="Description"
             type="text"
             fullWidth
             variant="outlined"
             onChange={onChange}
+          />
+          <Autocomplete
+            multiple
+            id="select-user-for-meeting"
+            options={users.map((u) => u)}
+            onChange={(event, value, reason, details) => {
+              setDatePickerEventFormData((prevState) => ({
+                ...prevState,
+                selectedUserNames: value.map((u) => u.userName),
+              }))
+            }}
+            getOptionLabel={(option) => option.name}
+            getOptionKey={(option) => option.userName}
+            renderInput={(params) => (
+              <TextField {...params} variant="standard" label="Names" />
+            )}
           />
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Box mb={2} mt={5}>
@@ -129,15 +146,6 @@ const AddDatePickerEventModal = ({
               }
             />
           </LocalizationProvider>
-          <Autocomplete
-            onChange={handleTodoChange}
-            disablePortal
-            id="combo-box-demo"
-            options={todos}
-            sx={{ marginTop: 4 }}
-            getOptionLabel={(option) => option.title}
-            renderInput={(params) => <TextField {...params} label="Todo" />}
-          />
         </Box>
       </DialogContent>
       <DialogActions>

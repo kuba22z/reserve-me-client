@@ -23,7 +23,12 @@ import EventInfoModal from './EventInfoModal'
 import { AddTodoModal } from './AddTodoModal'
 import AddDatePickerEventModal from './AddDatePickerEventModal'
 import 'moment/locale/de'
-import { CreateMeetingDto, MeetingDto } from '@/gql/__generated__/types'
+import {
+  CounterDto,
+  CreateMeetingDto,
+  MeetingDto,
+  UserDto,
+} from '@/gql/__generated__/types'
 
 // const locales = {
 //   "en-US": enUS,
@@ -39,17 +44,19 @@ export interface ITodo {
 
 export interface IEventInfo extends Event {
   _id: string
-  description: string
+  users: UserDto[]
   todoId?: string
 }
 
 export interface EventFormData {
-  description: string
+  users: ReadonlyArray<UserDto>
+  selectedUserNames: string[]
   todoId?: string
 }
 
 export interface DatePickerEventFormData {
-  description: string
+  users: ReadonlyArray<UserDto>
+  selectedUserNames: string[]
   todoId?: string
   allDay: boolean
   start?: Date
@@ -59,25 +66,19 @@ export interface DatePickerEventFormData {
 export const generateId = () =>
   (Math.floor(Math.random() * 10000) + 1).toString()
 
-const initialEventFormState: EventFormData = {
-  description: '',
-  todoId: undefined,
-}
-
-const initialDatePickerEventFormData: DatePickerEventFormData = {
-  description: '',
-  todoId: undefined,
-  allDay: false,
-  start: undefined,
-  end: undefined,
-}
-
 interface EventCalendarProps {
   meetings: ReadonlyArray<MeetingDto>
+  users: ReadonlyArray<UserDto>
   createMeeting: (meeting: CreateMeetingDto) => Promise<MeetingDto>
+  deleteMeetings: (ids: number[]) => Promise<CounterDto>
 }
 
-function EventCalendar({ meetings, createMeeting }: EventCalendarProps) {
+function EventCalendar({
+  meetings,
+  createMeeting,
+  deleteMeetings,
+  users,
+}: EventCalendarProps) {
   const [openSlot, setOpenSlot] = useState(false)
   const [openDatepickerModal, setOpenDatepickerModal] = useState(false)
   const [openTodoModal, setOpenTodoModal] = useState(false)
@@ -87,29 +88,45 @@ function EventCalendar({ meetings, createMeeting }: EventCalendarProps) {
 
   const [eventInfoModal, setEventInfoModal] = useState(false)
 
+  const getUsersDtoByUserNames = (userNames: ReadonlyArray<string>) => {
+    return users.filter((u) => userNames.includes(u.userName))
+  }
+
   const [events, setEvents] = useState<IEventInfo[]>(
     meetings
       .filter((m) => m.schedules && m.schedules.length > 0)
       .map((m) => {
         const schedule = m.schedules![0]
-        const userNames = m.userNames.join(',')
         return {
           start: new Date(schedule.startDate),
           end: new Date(schedule.endDate),
           allDay: false,
-          description: userNames,
           todoId: m.id.toString(),
           _id: m.id.toString(),
           resource: null,
+          users: getUsersDtoByUserNames(m.userNames),
         }
       })
   )
   const [todos, setTodos] = useState<ITodo[]>([])
 
+  const initialEventFormState = {
+    users: users,
+    selectedUserNames: [],
+    todoId: undefined,
+  }
   const [eventFormData, setEventFormData] = useState<EventFormData>(
     initialEventFormState
   )
 
+  const initialDatePickerEventFormData: DatePickerEventFormData = {
+    users: users,
+    selectedUserNames: [],
+    todoId: undefined,
+    allDay: false,
+    start: undefined,
+    end: undefined,
+  }
   const [datePickerEventFormData, setDatePickerEventFormData] =
     useState<DatePickerEventFormData>(initialDatePickerEventFormData)
 
@@ -135,13 +152,6 @@ function EventCalendar({ meetings, createMeeting }: EventCalendarProps) {
 
   const onAddEvent = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    const data: IEventInfo = {
-      ...eventFormData,
-      _id: generateId(),
-      start: currentEvent?.start,
-      end: currentEvent?.end,
-    }
-
     createMeeting({
       priceExcepted: 0,
       createdByExternalRefId: '1',
@@ -150,9 +160,20 @@ function EventCalendar({ meetings, createMeeting }: EventCalendarProps) {
         endDate: currentEvent?.end,
         locationId: 585,
       },
+      userNames: eventFormData.selectedUserNames,
     }).then((meeting) => {
-      const newEvents = [...events, data]
-
+      const { selectedUserNames, users, ...eventFormDataWithoutUsers } =
+        eventFormData
+      const newEvents: IEventInfo[] = [
+        ...events,
+        {
+          ...eventFormDataWithoutUsers,
+          _id: meeting.id.toString(),
+          start: currentEvent?.start,
+          end: currentEvent?.end,
+          users: getUsersDtoByUserNames(meeting.userNames),
+        },
+      ]
       setEvents(newEvents)
       handleClose()
     })
@@ -170,7 +191,6 @@ function EventCalendar({ meetings, createMeeting }: EventCalendarProps) {
 
       return date
     }
-
     createMeeting({
       priceExcepted: 0,
       createdByExternalRefId: '1',
@@ -181,6 +201,7 @@ function EventCalendar({ meetings, createMeeting }: EventCalendarProps) {
           : setMinToZero(datePickerEventFormData.end),
         locationId: 585,
       },
+      userNames: datePickerEventFormData.selectedUserNames,
     }).then((meeting) => {
       const data: IEventInfo = {
         ...datePickerEventFormData,
@@ -189,6 +210,7 @@ function EventCalendar({ meetings, createMeeting }: EventCalendarProps) {
         end: datePickerEventFormData.allDay
           ? addHours(datePickerEventFormData.start, 12)
           : setMinToZero(datePickerEventFormData.end),
+        users: getUsersDtoByUserNames(meeting.userNames),
       }
 
       const newEvents = [...events, data]
@@ -199,10 +221,17 @@ function EventCalendar({ meetings, createMeeting }: EventCalendarProps) {
   }
 
   const onDeleteEvent = () => {
-    setEvents(() =>
-      [...events].filter((e) => e._id !== (currentEvent as IEventInfo)._id)
-    )
-    setEventInfoModal(false)
+    const currentEventInfo = currentEvent as IEventInfo
+    deleteMeetings([parseInt(currentEventInfo._id)]).then((count) => {
+      if (count.count === 1) {
+        setEvents(() =>
+          [...events].filter((e) => e._id !== currentEventInfo._id)
+        )
+        setEventInfoModal(false)
+      } else {
+        throw Error('Meeting could not be deleted')
+      }
+    })
   }
   return (
     <Box

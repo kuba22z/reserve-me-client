@@ -1,0 +1,5 @@
+mutation deleteMeeting($ids: [Int!]!){
+    deleteMeetings(ids: $ids){
+        count
+    }
+}

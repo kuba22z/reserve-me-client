@@ -29,13 +29,9 @@ export async function addLocation() {
       location: d,
     },
     update(cache, { data }) {
-      console.log('data')
-      console.log(data)
       cache.modify({
         fields: {
           locations(existingTodos = []) {
-            console.log('existingTodos')
-            console.log(existingTodos)
             const newTodoRef = cache.writeFragment({
               data: data!.createLocation,
               fragment: LocationFragmentFragmentDoc,

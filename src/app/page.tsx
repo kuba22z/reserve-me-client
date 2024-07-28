@@ -71,7 +71,6 @@ const getUserByGroup = async (token: string) => {
     context: { headers: { authorization: 'Bearer ' + token } },
     variables: { group: CognitoGroupDto.Admin },
   })
-  console.log(data.usersByGroup)
   return data.usersByGroup
 }
 
@@ -80,7 +79,6 @@ const getUsers = async (token: string) => {
     query: GetUsersDocument,
     context: { headers: { authorization: 'Bearer ' + token } },
   })
-  console.log(networkStatus)
   return data.users
 }
 

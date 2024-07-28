@@ -5,8 +5,15 @@ import { config } from '@/config'
 import EventCalendar from '@/components/dashboard/calendar/EventCalendar'
 import { getClient } from '@/gql/client'
 import { GetMeetingDocument } from '@/gql/queries/get-meeting.generated'
-import { CreateMeetingDto, MeetingDto } from '@/gql/__generated__/types'
+import {
+  CounterDto,
+  CreateMeetingDto,
+  MeetingDto,
+  UserDto,
+} from '@/gql/__generated__/types'
 import { CreateMeetingDocument } from '@/gql/queries/create-meeting.generated'
+import { GetUsersDocument } from '@/gql/queries/get-users.generated'
+import { DeleteMeetingDocument } from '@/gql/queries/delete-meeting.generated'
 
 export const metadata = {
   title: `Overview | Dashboard | ${config.site.name}`,
@@ -30,12 +37,34 @@ const createMeeting = async (
   return data!.createMeeting
 }
 
+const getUsers = async (): Promise<ReadonlyArray<UserDto>> => {
+  'use server'
+  const { data, errors } = await getClient().query({
+    query: GetUsersDocument,
+  })
+  return data!.users
+}
+
+const deleteMeetings = async (ids: number[]): Promise<CounterDto> => {
+  'use server'
+  const { data, errors } = await getClient().mutate({
+    mutation: DeleteMeetingDocument,
+    variables: { ids: ids },
+  })
+  return data!.deleteMeetings
+}
+
 export default async function Page(): Promise<React.JSX.Element> {
   const meetings = await getMeetings()
-  console.log(meetings)
+  const users = await getUsers()
   return (
     <>
-      <EventCalendar meetings={meetings} createMeeting={createMeeting} />
+      <EventCalendar
+        meetings={meetings}
+        createMeeting={createMeeting}
+        deleteMeetings={deleteMeetings}
+        users={users}
+      />
     </>
   )
 }
