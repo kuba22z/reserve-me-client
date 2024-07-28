@@ -8,12 +8,14 @@ import { GetMeetingDocument } from '@/gql/queries/get-meeting.generated'
 import {
   CounterDto,
   CreateMeetingDto,
+  LocationDto,
   MeetingDto,
   UserDto,
 } from '@/gql/__generated__/types'
 import { CreateMeetingDocument } from '@/gql/queries/create-meeting.generated'
 import { GetUsersDocument } from '@/gql/queries/get-users.generated'
 import { DeleteMeetingDocument } from '@/gql/queries/delete-meeting.generated'
+import { GetLocationDocument } from '@/gql/queries/get-location.generated'
 
 export const metadata = {
   title: `Overview | Dashboard | ${config.site.name}`,
@@ -45,6 +47,14 @@ const getUsers = async (): Promise<ReadonlyArray<UserDto>> => {
   return data!.users
 }
 
+const getLocations = async (): Promise<ReadonlyArray<LocationDto>> => {
+  'use server'
+  const { data, errors } = await getClient().query({
+    query: GetLocationDocument,
+  })
+  return data!.locations
+}
+
 const deleteMeetings = async (ids: number[]): Promise<CounterDto> => {
   'use server'
   const { data, errors } = await getClient().mutate({
@@ -57,6 +67,7 @@ const deleteMeetings = async (ids: number[]): Promise<CounterDto> => {
 export default async function Page(): Promise<React.JSX.Element> {
   const meetings = await getMeetings()
   const users = await getUsers()
+  const locations = await getLocations()
   return (
     <>
       <EventCalendar
@@ -64,6 +75,7 @@ export default async function Page(): Promise<React.JSX.Element> {
         createMeeting={createMeeting}
         deleteMeetings={deleteMeetings}
         users={users}
+        locations={locations}
       />
     </>
   )

@@ -12,9 +12,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { DatePickerEventFormData, ITodo } from './EventCalendar'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 
 interface IProps {
   open: boolean
@@ -33,7 +34,15 @@ const AddDatePickerEventModal = ({
   onAddEvent,
   todos,
 }: IProps) => {
-  const { users, start, end, allDay } = datePickerEventFormData
+  const {
+    users,
+    selectedUserNames,
+    locations,
+    selectedLocation,
+    start,
+    end,
+    allDay,
+  } = datePickerEventFormData
 
   const onClose = () => {
     handleClose()
@@ -66,7 +75,12 @@ const AddDatePickerEventModal = ({
         return true
       }
     }
-    if (users.length === 0 || start === null || checkend()) {
+    if (
+      selectedUserNames.length === 0 ||
+      selectedLocation === null ||
+      start === null ||
+      checkend()
+    ) {
       return true
     }
     return false
@@ -106,6 +120,26 @@ const AddDatePickerEventModal = ({
             getOptionKey={(option) => option.userName}
             renderInput={(params) => (
               <TextField {...params} variant="standard" label="Names" />
+            )}
+          />
+          <Autocomplete
+            options={locations}
+            getOptionLabel={(option) => option.name}
+            id="select-location"
+            clearOnEscape
+            onChange={(event, value, reason, details) => {
+              setDatePickerEventFormData((prevState) => ({
+                ...prevState,
+                selectedLocation: value,
+              }))
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                required
+                label="Location"
+                variant="standard"
+              />
             )}
           />
           <LocalizationProvider dateAdapter={AdapterDateFns}>

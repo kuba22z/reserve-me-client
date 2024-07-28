@@ -9,6 +9,7 @@ const EventInfo = ({ event }: IProps) => {
   return (
     <>
       <Typography>{event.users.map((a) => a.name).join(',')}</Typography>
+      <Typography>{event.location.name}</Typography>
     </>
   )
 }

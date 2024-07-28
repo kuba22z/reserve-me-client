@@ -11,13 +11,16 @@ import {
   Divider,
 } from '@mui/material'
 
-import { Calendar, type Event, momentLocalizer } from 'react-big-calendar'
+import {
+  Calendar,
+  type Event,
+  momentLocalizer,
+  Views,
+} from 'react-big-calendar'
 
 import moment from 'moment-timezone'
 
 import 'react-big-calendar/lib/css/react-big-calendar.css'
-
-import EventInfo from './EventInfo'
 import AddEventModal from './AddEventModal'
 import EventInfoModal from './EventInfoModal'
 import { AddTodoModal } from './AddTodoModal'
@@ -26,9 +29,11 @@ import 'moment/locale/de'
 import {
   CounterDto,
   CreateMeetingDto,
+  LocationDto,
   MeetingDto,
   UserDto,
 } from '@/gql/__generated__/types'
+import EventInfo from '@/components/dashboard/calendar/EventInfo'
 
 // const locales = {
 //   "en-US": enUS,
@@ -45,11 +50,14 @@ export interface ITodo {
 export interface IEventInfo extends Event {
   _id: string
   users: UserDto[]
+  location: LocationDto
   todoId?: string
 }
 
 export interface EventFormData {
   users: ReadonlyArray<UserDto>
+  locations: ReadonlyArray<LocationDto>
+  selectedLocation: LocationDto | null
   selectedUserNames: string[]
   todoId?: string
 }
@@ -57,6 +65,8 @@ export interface EventFormData {
 export interface DatePickerEventFormData {
   users: ReadonlyArray<UserDto>
   selectedUserNames: string[]
+  locations: ReadonlyArray<LocationDto>
+  selectedLocation: LocationDto | null
   todoId?: string
   allDay: boolean
   start?: Date
@@ -69,12 +79,14 @@ export const generateId = () =>
 interface EventCalendarProps {
   meetings: ReadonlyArray<MeetingDto>
   users: ReadonlyArray<UserDto>
+  locations: ReadonlyArray<LocationDto>
   createMeeting: (meeting: CreateMeetingDto) => Promise<MeetingDto>
   deleteMeetings: (ids: number[]) => Promise<CounterDto>
 }
 
 function EventCalendar({
   meetings,
+  locations,
   createMeeting,
   deleteMeetings,
   users,
@@ -95,17 +107,19 @@ function EventCalendar({
   const [events, setEvents] = useState<IEventInfo[]>(
     meetings
       .filter((m) => m.schedules && m.schedules.length > 0)
-      .map((m) => {
-        const schedule = m.schedules![0]
-        return {
-          start: new Date(schedule.startDate),
-          end: new Date(schedule.endDate),
-          allDay: false,
-          todoId: m.id.toString(),
-          _id: m.id.toString(),
-          resource: null,
-          users: getUsersDtoByUserNames(m.userNames),
-        }
+      .flatMap((m) => {
+        return m.schedules!.map((schedule) => {
+          return {
+            start: new Date(schedule.startDate),
+            end: new Date(schedule.endDate),
+            allDay: false,
+            todoId: m.id.toString(),
+            _id: m.id.toString(),
+            resource: null,
+            users: getUsersDtoByUserNames(m.userNames),
+            location: schedule.location,
+          }
+        })
       })
   )
   const [todos, setTodos] = useState<ITodo[]>([])
@@ -113,6 +127,8 @@ function EventCalendar({
   const initialEventFormState = {
     users: users,
     selectedUserNames: [],
+    locations: locations,
+    selectedLocation: null,
     todoId: undefined,
   }
   const [eventFormData, setEventFormData] = useState<EventFormData>(
@@ -122,6 +138,8 @@ function EventCalendar({
   const initialDatePickerEventFormData: DatePickerEventFormData = {
     users: users,
     selectedUserNames: [],
+    locations: locations,
+    selectedLocation: null,
     todoId: undefined,
     allDay: false,
     start: undefined,
@@ -158,12 +176,16 @@ function EventCalendar({
       schedule: {
         startDate: currentEvent?.start,
         endDate: currentEvent?.end,
-        locationId: 585,
+        locationId: eventFormData.selectedLocation!.id,
       },
       userNames: eventFormData.selectedUserNames,
     }).then((meeting) => {
-      const { selectedUserNames, users, ...eventFormDataWithoutUsers } =
-        eventFormData
+      const {
+        selectedUserNames,
+        users,
+        selectedLocation,
+        ...eventFormDataWithoutUsers
+      } = eventFormData
       const newEvents: IEventInfo[] = [
         ...events,
         {
@@ -172,6 +194,7 @@ function EventCalendar({
           start: currentEvent?.start,
           end: currentEvent?.end,
           users: getUsersDtoByUserNames(meeting.userNames),
+          location: meeting.schedules![0].location,
         },
       ]
       setEvents(newEvents)
@@ -199,7 +222,7 @@ function EventCalendar({
         endDate: datePickerEventFormData.allDay
           ? addHours(datePickerEventFormData.start, 12)
           : setMinToZero(datePickerEventFormData.end),
-        locationId: 585,
+        locationId: datePickerEventFormData.selectedLocation!.id,
       },
       userNames: datePickerEventFormData.selectedUserNames,
     }).then((meeting) => {
@@ -211,6 +234,7 @@ function EventCalendar({
           ? addHours(datePickerEventFormData.start, 12)
           : setMinToZero(datePickerEventFormData.end),
         users: getUsersDtoByUserNames(meeting.userNames),
+        location: meeting.schedules![0].location,
       }
 
       const newEvents = [...events, data]
@@ -240,7 +264,7 @@ function EventCalendar({
       component="main"
       sx={{
         flexGrow: 1,
-        py: 8,
+        py: 0,
       }}
     >
       <Container maxWidth={false}>
@@ -319,7 +343,7 @@ function EventCalendar({
               startAccessor="start"
               components={{ event: EventInfo }}
               endAccessor="end"
-              defaultView="week"
+              defaultView={Views.WEEK}
               eventPropGetter={(event) => {
                 const hasTodo = todos.find((todo) => todo._id === event.todoId)
                 return {

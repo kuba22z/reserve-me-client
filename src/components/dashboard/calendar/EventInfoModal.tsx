@@ -42,6 +42,15 @@ const EventInfoModal = ({
               ? currentEvent.users.map((a) => a.name).join(',')
               : ''}
           </Typography>
+          <Typography
+            sx={{ fontSize: 14, marginTop: 3 }}
+            color="text.secondary"
+            gutterBottom
+          >
+            {currentEvent && currentEvent.location
+              ? currentEvent.location.name
+              : ''}
+          </Typography>
         </DialogContentText>
         <Box component="form"></Box>
       </DialogContent>

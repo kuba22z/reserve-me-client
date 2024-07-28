@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, MouseEvent, SetStateAction } from 'react'
+import React, { ChangeEvent, Dispatch, MouseEvent, SetStateAction } from 'react'
 import {
   Autocomplete,
   Box,
@@ -29,7 +29,8 @@ const AddEventModal = ({
   onAddEvent,
   todos,
 }: IProps) => {
-  const { selectedUserNames, users } = eventFormData
+  const { selectedUserNames, users, selectedLocation, locations } =
+    eventFormData
 
   const onClose = () => handleClose()
 
@@ -83,6 +84,26 @@ const AddEventModal = ({
               <TextField {...params} variant="standard" label="Names" />
             )}
           />
+          <Autocomplete
+            options={locations}
+            getOptionLabel={(option) => option.name}
+            id="select-location"
+            clearOnEscape
+            onChange={(event, value, reason, details) => {
+              setEventFormData((prevState) => ({
+                ...prevState,
+                selectedLocation: value,
+              }))
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                required
+                label="Location"
+                variant="standard"
+              />
+            )}
+          />
         </Box>
       </DialogContent>
       <DialogActions>
@@ -90,7 +111,7 @@ const AddEventModal = ({
           Cancel
         </Button>
         <Button
-          disabled={selectedUserNames.length === 0}
+          disabled={selectedUserNames.length === 0 || selectedLocation === null}
           color="success"
           onClick={onAddEvent}
         >

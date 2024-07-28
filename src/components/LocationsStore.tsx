@@ -9,7 +9,7 @@ export function LocationsStore() {
 
   useEffect(() => {
     getLocations()
-  })
+  }, [])
 
   return <div>{locations ? locations.map((a) => a.city + ' ') : ''}</div>
 }
