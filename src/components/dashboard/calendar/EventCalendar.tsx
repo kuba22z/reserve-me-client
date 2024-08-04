@@ -103,25 +103,24 @@ function EventCalendar({
   const getUsersDtoByUserNames = (userNames: ReadonlyArray<string>) => {
     return users.filter((u) => userNames.includes(u.userName))
   }
-
-  const [events, setEvents] = useState<IEventInfo[]>(
-    meetings
-      .filter((m) => m.schedules && m.schedules.length > 0)
-      .flatMap((m) => {
-        return m.schedules!.map((schedule) => {
-          return {
-            start: new Date(schedule.startDate),
-            end: new Date(schedule.endDate),
-            allDay: false,
-            todoId: m.id.toString(),
-            _id: m.id.toString(),
-            resource: null,
-            users: getUsersDtoByUserNames(m.userNames),
-            location: schedule.location,
-          }
-        })
+  const events = meetings
+    .filter((m) => m.schedules && m.schedules.length > 0)
+    .flatMap((m) => {
+      return m.schedules!.map((schedule) => {
+        return {
+          start: new Date(schedule.startDate),
+          end: new Date(schedule.endDate),
+          allDay: false,
+          todoId: m.id.toString(),
+          _id: m.id.toString(),
+          resource: null,
+          users: getUsersDtoByUserNames(m.userNames),
+          location: schedule.location,
+        }
       })
-  )
+    })
+
+  const [showedEvents, setShowedEvents] = useState<IEventInfo[]>(events)
   const [todos, setTodos] = useState<ITodo[]>([])
 
   const initialEventFormState = {
@@ -148,6 +147,8 @@ function EventCalendar({
   const [datePickerEventFormData, setDatePickerEventFormData] =
     useState<DatePickerEventFormData>(initialDatePickerEventFormData)
 
+  const upperCourtColor = '#ff9800'
+  const lowerCourtColor = '#8bc34a'
   const handleSelectSlot = (event: Event) => {
     setOpenSlot(true)
     setCurrentEvent(event)
@@ -187,7 +188,7 @@ function EventCalendar({
         ...eventFormDataWithoutUsers
       } = eventFormData
       const newEvents: IEventInfo[] = [
-        ...events,
+        ...showedEvents,
         {
           ...eventFormDataWithoutUsers,
           _id: meeting.id.toString(),
@@ -197,7 +198,7 @@ function EventCalendar({
           location: meeting.schedules![0].location,
         },
       ]
-      setEvents(newEvents)
+      setShowedEvents(newEvents)
       handleClose()
     })
   }
@@ -237,19 +238,20 @@ function EventCalendar({
         location: meeting.schedules![0].location,
       }
 
-      const newEvents = [...events, data]
+      const newEvents = [...showedEvents, data]
 
-      setEvents(newEvents)
+      setShowedEvents(newEvents)
       setDatePickerEventFormData(initialDatePickerEventFormData)
     })
   }
 
   const onDeleteEvent = () => {
     const currentEventInfo = currentEvent as IEventInfo
+    console.log(currentEventInfo)
     deleteMeetings([parseInt(currentEventInfo._id)]).then((count) => {
       if (count.count === 1) {
-        setEvents(() =>
-          [...events].filter((e) => e._id !== currentEventInfo._id)
+        setShowedEvents(() =>
+          [...showedEvents].filter((e) => e._id !== currentEventInfo._id)
         )
         setEventInfoModal(false)
       } else {
@@ -283,21 +285,51 @@ function EventCalendar({
               >
                 <Button
                   onClick={() => {
+                    setShowedEvents(events)
+                  }}
+                  size="small"
+                  variant="contained"
+                >
+                  Total
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowedEvents(
+                      events.filter((e) => e.location.name === 'Upper Court')
+                    )
+                  }}
+                  size="small"
+                  variant="contained"
+                  style={{ backgroundColor: upperCourtColor }}
+                >
+                  Upper Court
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowedEvents(
+                      events.filter((e) => e.location.name === 'Lower Court')
+                    )
+                  }}
+                  size="small"
+                  variant="contained"
+                  style={{ backgroundColor: lowerCourtColor }}
+                >
+                  Lower Court
+                </Button>
+              </ButtonGroup>
+              <ButtonGroup
+                size="large"
+                variant="contained"
+                aria-label="outlined primary button group"
+              >
+                <Button
+                  onClick={() => {
                     setOpenDatepickerModal(true)
                   }}
                   size="small"
                   variant="contained"
                 >
                   Add event
-                </Button>
-                <Button
-                  onClick={() => {
-                    setOpenTodoModal(true)
-                  }}
-                  size="small"
-                  variant="contained"
-                >
-                  Create todo
                 </Button>
               </ButtonGroup>
             </Box>
@@ -336,7 +368,7 @@ function EventCalendar({
             />
             <Calendar
               localizer={localizer}
-              events={events}
+              events={showedEvents}
               onSelectEvent={handleSelectEvent}
               onSelectSlot={handleSelectSlot}
               selectable
@@ -345,11 +377,14 @@ function EventCalendar({
               endAccessor="end"
               defaultView={Views.WEEK}
               eventPropGetter={(event) => {
-                const hasTodo = todos.find((todo) => todo._id === event.todoId)
+                const color =
+                  event.location.name === 'Upper Court'
+                    ? upperCourtColor
+                    : lowerCourtColor
                 return {
                   style: {
-                    backgroundColor: hasTodo ? hasTodo.color : '#b64fc8',
-                    borderColor: hasTodo ? hasTodo.color : '#b64fc8',
+                    backgroundColor: color,
+                    borderColor: color,
                   },
                 }
               }}
