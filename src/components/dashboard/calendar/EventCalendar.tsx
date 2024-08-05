@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 import { MouseEvent, useState } from 'react'
 import {
   Box,
@@ -34,6 +35,7 @@ import {
   UserDto,
 } from '@/gql/__generated__/types'
 import EventInfo from '@/components/dashboard/calendar/EventInfo'
+import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus'
 
 // const locales = {
 //   "en-US": enUS,
@@ -285,6 +287,22 @@ function EventCalendar({
               >
                 <Button
                   onClick={() => {
+                    setOpenDatepickerModal(true)
+                  }}
+                  size="medium"
+                  variant="contained"
+                  startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
+                >
+                  Add event
+                </Button>
+              </ButtonGroup>
+              <ButtonGroup
+                size="large"
+                variant="contained"
+                aria-label="outlined primary button group"
+              >
+                <Button
+                  onClick={() => {
                     setShowedEvents(events)
                   }}
                   size="small"
@@ -315,21 +333,6 @@ function EventCalendar({
                   style={{ backgroundColor: lowerCourtColor }}
                 >
                   Lower Court
-                </Button>
-              </ButtonGroup>
-              <ButtonGroup
-                size="large"
-                variant="contained"
-                aria-label="outlined primary button group"
-              >
-                <Button
-                  onClick={() => {
-                    setOpenDatepickerModal(true)
-                  }}
-                  size="small"
-                  variant="contained"
-                >
-                  Add event
                 </Button>
               </ButtonGroup>
             </Box>

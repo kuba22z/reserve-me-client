@@ -11,6 +11,8 @@ import {
   TextField,
 } from '@mui/material'
 import { EventFormData, ITodo } from './EventCalendar'
+import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 
 interface IProps {
   open: boolean
@@ -31,7 +33,8 @@ const AddEventModal = ({
 }: IProps) => {
   const { selectedUserNames, users, selectedLocation, locations } =
     eventFormData
-
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
   const onClose = () => handleClose()
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +52,7 @@ const AddEventModal = ({
   }
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog fullScreen={fullScreen} open={open} onClose={onClose}>
       <DialogTitle>Add event</DialogTitle>
       <DialogContent>
         <DialogContentText>

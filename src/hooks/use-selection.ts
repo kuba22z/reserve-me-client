@@ -14,9 +14,10 @@ export interface Selection<T = string> {
 export function useSelection<T = string>(keys: T[] = []): Selection<T> {
   const [selected, setSelected] = React.useState<Set<T>>(new Set())
 
-  React.useEffect(() => {
-    setSelected(new Set())
-  }, [keys])
+  //cause to many re-rendering, see error in console
+  // React.useEffect(() => {
+  //   setSelected(new Set())
+  // }, [keys])
 
   const handleDeselectAll = React.useCallback(() => {
     setSelected(new Set())

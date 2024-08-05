@@ -16,6 +16,8 @@ import {
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { DatePickerEventFormData, ITodo } from './EventCalendar'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 
 interface IProps {
   open: boolean
@@ -43,7 +45,8 @@ const AddDatePickerEventModal = ({
     end,
     allDay,
   } = datePickerEventFormData
-
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
   const onClose = () => {
     handleClose()
   }
@@ -87,7 +90,7 @@ const AddDatePickerEventModal = ({
   }
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog fullScreen={fullScreen} open={open} onClose={onClose}>
       <DialogTitle>Add event</DialogTitle>
       <DialogContent>
         <DialogContentText>

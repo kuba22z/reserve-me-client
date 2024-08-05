@@ -9,10 +9,9 @@ import CardHeader from '@mui/material/CardHeader'
 import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
 import OutlinedInput from '@mui/material/OutlinedInput'
-import Select from '@mui/material/Select'
 import Grid from '@mui/material/Unstable_Grid2'
+import { createUser } from '@/operations/create-user'
 
 const states = [
   { value: 'alabama', label: 'Alabama' },
@@ -21,11 +20,43 @@ const states = [
   { value: 'los-angeles', label: 'Los Angeles' },
 ] as const
 
-export function AccountDetailsForm(): React.JSX.Element {
+interface AccountDetailsFormProps {
+  handleClose?: () => void
+}
+
+interface FormState {
+  username: string
+  phoneNumber: string
+  name: string
+}
+
+export function AccountDetailsForm({
+  handleClose,
+}: AccountDetailsFormProps): React.JSX.Element {
+  const [formState, setFormState] = React.useState<FormState>({
+    username: '',
+    phoneNumber: '',
+    name: '',
+  })
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target
+    setFormState((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }))
+  }
+
   return (
     <form
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault()
+        await createUser({
+          userName: formState.username,
+          name: formState.name,
+          phoneNumber: formState.phoneNumber,
+        })
+        if (handleClose) handleClose()
       }}
     >
       <Card>
@@ -35,68 +66,65 @@ export function AccountDetailsForm(): React.JSX.Element {
           <Grid container spacing={3}>
             <Grid md={6} xs={12}>
               <FormControl fullWidth required>
-                <InputLabel>First name</InputLabel>
+                <InputLabel>User Name</InputLabel>
                 <OutlinedInput
-                  defaultValue="Sofia"
-                  label="First name"
-                  name="firstName"
-                />
-              </FormControl>
-            </Grid>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth required>
-                <InputLabel>Last name</InputLabel>
-                <OutlinedInput
-                  defaultValue="Rivers"
-                  label="Last name"
-                  name="lastName"
-                />
-              </FormControl>
-            </Grid>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth required>
-                <InputLabel>Email address</InputLabel>
-                <OutlinedInput
-                  defaultValue="sofia@devias.io"
-                  label="Email address"
-                  name="email"
+                  value={formState.username}
+                  label="Username"
+                  name="username"
+                  required
+                  onChange={handleInputChange}
                 />
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Phone number</InputLabel>
-                <OutlinedInput label="Phone number" name="phone" type="tel" />
+                <OutlinedInput
+                  value={formState.phoneNumber}
+                  label="Phone number"
+                  name="phoneNumber"
+                  type="tel"
+                  required
+                  onChange={handleInputChange}
+                />
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>State</InputLabel>
-                <Select
-                  defaultValue="New York"
-                  label="State"
-                  name="state"
-                  variant="outlined"
-                >
-                  {states.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
+              <FormControl fullWidth required>
+                <InputLabel>Name</InputLabel>
+                <OutlinedInput
+                  value={formState.name}
+                  label="Name"
+                  name="name"
+                  required
+                  onChange={handleInputChange}
+                />
               </FormControl>
             </Grid>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>City</InputLabel>
-                <OutlinedInput label="City" />
-              </FormControl>
-            </Grid>
+            {/*<Grid md={6} xs={12}>*/}
+            {/*  <FormControl fullWidth required>*/}
+            {/*    <InputLabel>Email address</InputLabel>*/}
+            {/*    <OutlinedInput*/}
+            {/*      defaultValue="sofia@devias.io"*/}
+            {/*      label="Email address"*/}
+            {/*      name="email"*/}
+            {/*    />*/}
+            {/*  </FormControl>*/}
+            {/*</Grid>*/}
           </Grid>
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained">Save details</Button>
+          {handleClose ? (
+            <Button variant="contained" onClick={handleClose}>
+              Exit
+            </Button>
+          ) : (
+            <></>
+          )}
+          <Button type={'submit'} variant="contained">
+            Save details
+          </Button>
         </CardActions>
       </Card>
     </form>
