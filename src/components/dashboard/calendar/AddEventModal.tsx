@@ -13,6 +13,7 @@ import {
 import { EventFormData, ITodo } from './EventCalendar'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
 
 interface IProps {
   open: boolean
@@ -36,6 +37,7 @@ const AddEventModal = ({
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
   const onClose = () => handleClose()
+  const accessLevel = useUserRoleAccessLevel()
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setEventFormData((prevState) => ({
@@ -71,22 +73,26 @@ const AddEventModal = ({
             variant="outlined"
             onChange={onChange}
           />
-          <Autocomplete
-            multiple
-            id="select-user-for-meeting"
-            options={users.map((u) => u)}
-            getOptionLabel={(option) => option.name}
-            getOptionKey={(option) => option.userName}
-            onChange={(event, value, reason, details) =>
-              setEventFormData((prevState) => ({
-                ...prevState,
-                selectedUserNames: value.map((u) => u.userName),
-              }))
-            }
-            renderInput={(params) => (
-              <TextField {...params} variant="standard" label="Names" />
-            )}
-          />
+          {accessLevel.createOther ? (
+            <Autocomplete
+              multiple
+              id="select-user-for-meeting"
+              options={users.map((u) => u)}
+              getOptionLabel={(option) => option.name}
+              getOptionKey={(option) => option.userName}
+              onChange={(event, value, reason, details) =>
+                setEventFormData((prevState) => ({
+                  ...prevState,
+                  selectedUserNames: value.map((u) => u.userName),
+                }))
+              }
+              renderInput={(params) => (
+                <TextField {...params} variant="standard" label="Names" />
+              )}
+            />
+          ) : (
+            <></>
+          )}
           <Autocomplete
             options={locations}
             getOptionLabel={(option) => option.name}

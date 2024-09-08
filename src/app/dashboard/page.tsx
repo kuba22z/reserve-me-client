@@ -16,6 +16,8 @@ import { CreateMeetingDocument } from '@/gql/queries/create-meeting.generated'
 import { GetUsersDocument } from '@/gql/queries/get-users.generated'
 import { DeleteMeetingDocument } from '@/gql/queries/delete-meeting.generated'
 import { GetLocationDocument } from '@/gql/queries/get-location.generated'
+import SwitchMobileComponent from '@/components/common/SwitchMobileComponent'
+import EventCalendarMobile from '@/components/dashboard/calendar/EventCalendarMobile'
 
 export const metadata = {
   title: `Overview | Dashboard | ${config.site.name}`,
@@ -68,15 +70,29 @@ export default async function Page(): Promise<React.JSX.Element> {
   const meetings = await getMeetings()
   const users = await getUsers()
   const locations = await getLocations()
+
   return (
     <>
-      <EventCalendar
-        meetings={meetings}
-        createMeeting={createMeeting}
-        deleteMeetings={deleteMeetings}
-        users={users}
-        locations={locations}
-      />
+      <SwitchMobileComponent
+        stationaryChild={
+          <EventCalendar
+            meetings={meetings}
+            createMeeting={createMeeting}
+            deleteMeetings={deleteMeetings}
+            users={users}
+            locations={locations}
+          />
+        }
+        mobileChild={
+          <EventCalendarMobile
+            meetings={meetings}
+            createMeeting={createMeeting}
+            deleteMeetings={deleteMeetings}
+            users={users}
+            locations={locations}
+          />
+        }
+      ></SwitchMobileComponent>
     </>
   )
 }

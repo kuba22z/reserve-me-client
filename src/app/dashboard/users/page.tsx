@@ -9,6 +9,7 @@ import { GetUsersByGroupDocument } from '@/gql/queries/get-users-by-group.genera
 import { CognitoGroupDto } from '@/gql/__generated__/types'
 import { UsersTable } from '@/components/dashboard/users/users-table'
 import { UserOperations } from '@/components/dashboard/users/user-operations'
+import { isMobileDevice } from '@/lib/isMobileDevice'
 
 export const metadata = {
   title: `Users | Dashboard | ${config.site.name}`,
@@ -21,14 +22,16 @@ export default async function Page(): Promise<React.JSX.Element> {
   })
 
   return (
-    <Stack spacing={3}>
-      <Stack direction="row" spacing={3}>
-        <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
-          <Typography variant="h4">Users</Typography>
-          <UserOperations />
+    <>
+      <Stack spacing={3}>
+        <Stack direction="row" spacing={3}>
+          <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
+            <Typography variant="h4">Users</Typography>
+            <UserOperations isMobile={isMobileDevice()} />
+          </Stack>
         </Stack>
+        <UsersTable users={data.usersByGroup} />
       </Stack>
-      <UsersTable users={data.usersByGroup} />
-    </Stack>
+    </>
   )
 }

@@ -13,6 +13,7 @@ import {
 import { GetTokenDocument } from '@/gql/queries/get-token.generated'
 import { getClientNoAuth } from '@/gql/clientNoAuth'
 import { externalUrl } from '@/config'
+import { RolePermissions } from '@/role-permissions'
 
 const PUBLIC_FILE = /\.(.*)$/
 
@@ -30,7 +31,13 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/api/auth/token')) {
     return NextResponse.next()
   }
-  if (CookieToken.get('accessToken')) {
+
+  if (CookieToken.get('accessToken') && CookieToken.getTokenRole().length > 0) {
+    const hasAccess = CookieToken.getTokenRole().some((group) =>
+      RolePermissions.hasAccess(group, pathname)
+    )
+    if (!hasAccess) return NextResponse.redirect(externalUrl.login)
+
     return NextResponse.next()
   }
   const refreshToken = CookieToken.get('refreshToken')

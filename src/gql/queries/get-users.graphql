@@ -1,5 +1,5 @@
 query getUsers {
     users {
-     id name userName groups phoneNumber
+     id name userName phoneNumber
     }
 }

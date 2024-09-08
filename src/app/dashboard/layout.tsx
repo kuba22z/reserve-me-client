@@ -6,6 +6,7 @@ import GlobalStyles from '@mui/material/GlobalStyles'
 import { MainNav } from '@/components/dashboard/layout/main-nav'
 import { SideNav } from '@/components/dashboard/layout/side-nav'
 import { AuthGuard } from '@/components/auth/auth-guard'
+import Stationary from '@/components/common/Stationary'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -13,7 +14,7 @@ interface LayoutProps {
 
 export default async function Layout({
   children,
-}: LayoutProps): Promise<React.JSX.Element> {
+}: Readonly<LayoutProps>): Promise<React.JSX.Element> {
   return (
     <AuthGuard>
       <GlobalStyles
@@ -46,7 +47,9 @@ export default async function Layout({
             pl: { lg: 'var(--SideNav-width)' },
           }}
         >
-          <MainNav />
+          <Stationary>
+            <MainNav />
+          </Stationary>
           <main>
             <Container maxWidth="xl" sx={{ py: '0px' }}>
               {children}

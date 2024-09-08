@@ -1,13 +1,13 @@
 'use client'
 import * as React from 'react'
 import { createContext, useContext } from 'react'
-import { UserDto } from '@/gql/__generated__/types'
+import { UserWithGroupDto } from '@/gql/__generated__/types'
 
 export interface UserProviderProps {
   children: React.ReactNode
-  user: UserDto
+  user: UserWithGroupDto
 }
-const UserContext = createContext<UserDto | null>(null)
+const UserContext = createContext<UserWithGroupDto | null>(null)
 
 export function UserProvider({
   children,

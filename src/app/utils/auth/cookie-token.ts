@@ -1,9 +1,10 @@
-import { TokenDto } from '@/gql/__generated__/types'
+import { CognitoGroupDto, TokenDto } from '@/gql/__generated__/types'
 import { cookies } from 'next/headers'
 import type { NextResponse } from 'next/server'
 import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies'
 
 type CookieTokenKey = 'accessToken' | 'refreshToken' | 'idToken'
+const TokenRoleKey = 'tokenRole'
 
 export namespace CookieToken {
   const ThirtyDaysInSec = 2592000
@@ -15,10 +16,15 @@ export namespace CookieToken {
       set('refreshToken', credentials.refreshToken, ThirtyDaysInSec)
     }
     set('idToken', credentials.idToken, credentials.expiresIn)
+    setTokenRole(credentials.groups)
   }
 
   export const get = (key: CookieTokenKey) => {
     return cookies().get(key)?.value
+  }
+
+  export const getTokenRole = () => {
+    return stringToCognitoGroupDto(cookies().get(TokenRoleKey)?.value)
   }
 
   export const remove = (key: CookieTokenKey) => {
@@ -51,8 +57,38 @@ export namespace CookieToken {
     )
   }
 
+  const cognitoGroupDtoToString = (groups: ReadonlyArray<CognitoGroupDto>) => {
+    return groups.map((a) => a.toString()).join(',')
+  }
+
+  const stringToCognitoGroupDto = (
+    tokenRole?: string
+  ): ReadonlyArray<CognitoGroupDto> => {
+    return tokenRole
+      ? tokenRole.split(',').map((role) => {
+          switch (role) {
+            case CognitoGroupDto.Admin:
+              return CognitoGroupDto.Admin
+            case CognitoGroupDto.Employee:
+              return CognitoGroupDto.Employee
+            case CognitoGroupDto.Client:
+              return CognitoGroupDto.Client
+            default:
+              throw Error
+          }
+        })
+      : []
+  }
+
+  const cognitoGroupDtoTo = (groups: ReadonlyArray<CognitoGroupDto>) => {
+    return groups.map((a) => a.toString()).join(',')
+  }
+
   const set = (key: CookieTokenKey, value: string, maxAgeInSec: number) => {
     cookies().set(cookieConfig(key, value, maxAgeInSec))
+  }
+  const setTokenRole = (groups: ReadonlyArray<CognitoGroupDto>) => {
+    cookies().set(TokenRoleKey, cognitoGroupDtoToString(groups))
   }
 
   const setInResponse = (

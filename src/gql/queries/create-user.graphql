@@ -1,5 +1,5 @@
 mutation CreateUser($user: CreateUserDto!){
     createUser(user: $user) {
-        id,userName,name,phoneNumber,groups
+        id,userName,name,phoneNumber
     }
 }

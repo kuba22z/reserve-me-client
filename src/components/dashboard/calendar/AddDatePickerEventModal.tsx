@@ -18,6 +18,7 @@ import { DatePickerEventFormData, ITodo } from './EventCalendar'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
 
 interface IProps {
   open: boolean
@@ -57,6 +58,7 @@ const AddDatePickerEventModal = ({
       [event.target.name]: event.target.value,
     }))
   }
+  const accessLevel = useUserRoleAccessLevel()
 
   const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
     setDatePickerEventFormData((prevState) => ({
@@ -109,22 +111,26 @@ const AddDatePickerEventModal = ({
             variant="outlined"
             onChange={onChange}
           />
-          <Autocomplete
-            multiple
-            id="select-user-for-meeting"
-            options={users.map((u) => u)}
-            onChange={(event, value, reason, details) => {
-              setDatePickerEventFormData((prevState) => ({
-                ...prevState,
-                selectedUserNames: value.map((u) => u.userName),
-              }))
-            }}
-            getOptionLabel={(option) => option.name}
-            getOptionKey={(option) => option.userName}
-            renderInput={(params) => (
-              <TextField {...params} variant="standard" label="Names" />
-            )}
-          />
+          {accessLevel.createOther ? (
+            <Autocomplete
+              multiple
+              id="select-user-for-meeting"
+              options={users.map((u) => u)}
+              onChange={(event, value, reason, details) => {
+                setDatePickerEventFormData((prevState) => ({
+                  ...prevState,
+                  selectedUserNames: value.map((u) => u.userName),
+                }))
+              }}
+              getOptionLabel={(option) => option.name}
+              getOptionKey={(option) => option.userName}
+              renderInput={(params) => (
+                <TextField {...params} variant="standard" label="Names" />
+              )}
+            />
+          ) : (
+            <></>
+          )}
           <Autocomplete
             options={locations}
             getOptionLabel={(option) => option.name}
