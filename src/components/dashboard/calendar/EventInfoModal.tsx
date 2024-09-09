@@ -10,6 +10,9 @@ import {
   Typography,
 } from '@mui/material'
 import { IEventInfo } from './EventCalendar'
+import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
+import { DashboardAccessLevels } from '@/role-permissions'
+import { useUserContext } from '@/components/core/UserProvider'
 
 interface IProps {
   open: boolean
@@ -24,6 +27,8 @@ const EventInfoModal = ({
   onDeleteEvent,
   currentEvent,
 }: IProps) => {
+  const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
+  const user = useUserContext()
   const onClose = () => {
     handleClose()
   }
@@ -58,9 +63,18 @@ const EventInfoModal = ({
         <Button color="error" onClick={onClose}>
           Cancel
         </Button>
-        <Button color="info" onClick={onDeleteEvent}>
-          Delete Event
-        </Button>
+        {accessLevel.deleteOther ||
+        (currentEvent &&
+          currentEvent.users &&
+          currentEvent.users
+            .map((user) => user.userName)
+            .includes(user.userName)) ? (
+          <Button color="info" onClick={onDeleteEvent}>
+            Delete Event
+          </Button>
+        ) : (
+          <></>
+        )}
       </DialogActions>
     </Dialog>
   )

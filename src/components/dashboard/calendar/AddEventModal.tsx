@@ -14,6 +14,7 @@ import { EventFormData, ITodo } from './EventCalendar'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
+import { DashboardAccessLevels } from '@/role-permissions'
 
 interface IProps {
   open: boolean
@@ -37,8 +38,7 @@ const AddEventModal = ({
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
   const onClose = () => handleClose()
-  const accessLevel = useUserRoleAccessLevel()
-
+  const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setEventFormData((prevState) => ({
       ...prevState,

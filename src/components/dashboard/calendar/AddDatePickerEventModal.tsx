@@ -19,6 +19,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
+import { DashboardAccessLevels } from '@/role-permissions'
 
 interface IProps {
   open: boolean
@@ -58,7 +59,7 @@ const AddDatePickerEventModal = ({
       [event.target.name]: event.target.value,
     }))
   }
-  const accessLevel = useUserRoleAccessLevel()
+  const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
 
   const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
     setDatePickerEventFormData((prevState) => ({

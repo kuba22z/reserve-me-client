@@ -27,17 +27,14 @@ import EventInfoModal from './EventInfoModal'
 import { AddTodoModal } from './AddTodoModal'
 import AddDatePickerEventModal from './AddDatePickerEventModal'
 import 'moment/locale/de'
-import {
-  CounterDto,
-  CreateMeetingDto,
-  LocationDto,
-  MeetingDto,
-  UserDto,
-} from '@/gql/__generated__/types'
+import { LocationDto, MeetingDto, UserDto } from '@/gql/__generated__/types'
 import EventInfo from '@/components/dashboard/calendar/EventInfo'
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus'
 import { useUserContext } from '@/components/core/UserProvider'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
+import { DashboardAccessLevels } from '@/role-permissions'
+import { deleteMeetings } from '@/operations/meeting/deleteMeetings'
+import { createMeeting } from '@/operations/meeting/createMeetings'
 
 // const locales = {
 //   "en-US": enUS,
@@ -84,19 +81,15 @@ interface EventCalendarProps {
   meetings: ReadonlyArray<MeetingDto>
   users: ReadonlyArray<UserDto>
   locations: ReadonlyArray<LocationDto>
-  createMeeting: (meeting: CreateMeetingDto) => Promise<MeetingDto>
-  deleteMeetings: (ids: number[]) => Promise<CounterDto>
 }
 
 function EventCalendar({
   meetings,
   locations,
-  createMeeting,
-  deleteMeetings,
   users,
 }: Readonly<EventCalendarProps>) {
   const user = useUserContext()
-  const accessLevel = useUserRoleAccessLevel()
+  const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
 
   const [openSlot, setOpenSlot] = useState(false)
   const [openDatepickerModal, setOpenDatepickerModal] = useState(false)
@@ -276,10 +269,7 @@ function EventCalendar({
     >
       <Container maxWidth={false}>
         <Card>
-          <CardHeader
-            title="Calendar"
-            subheader="Create Events and Todos and manage them easily"
-          />
+          <CardHeader subheader="Create Events and Todos and manage them easily" />
           <Divider />
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -306,7 +296,6 @@ function EventCalendar({
               >
                 <Button
                   onClick={() => {
-                    console.log(events)
                     setShowedEvents(
                       events.filter((e) =>
                         e.users.map((user) => user.id).includes(user.id)
@@ -330,7 +319,7 @@ function EventCalendar({
                 <Button
                   onClick={() => {
                     setShowedEvents(
-                      events.filter((e) => e.location.name === 'Upper Court')
+                      events.filter((e) => e.location.name === 'location2')
                     )
                   }}
                   size="small"
@@ -342,7 +331,7 @@ function EventCalendar({
                 <Button
                   onClick={() => {
                     setShowedEvents(
-                      events.filter((e) => e.location.name === 'Lower Court')
+                      events.filter((e) => e.location.name === 'location1')
                     )
                   }}
                   size="small"

@@ -7,9 +7,6 @@ import Grid from '@mui/material/Unstable_Grid2'
 import { config } from '@/config'
 import { AccountInfo } from '@/components/dashboard/account/account-info'
 import { BottomNav } from '@/components/dashboard/layout/bottom-nav'
-import BottomNavigationAction from '@mui/material/BottomNavigationAction/BottomNavigationAction'
-import AddIcon from '@mui/icons-material/Add'
-import { paths } from '@/paths'
 import Mobile from '@/components/common/Mobile'
 import { LogoutButton } from '@/components/dashboard/account/LogoutButton'
 
@@ -36,13 +33,7 @@ export default function Page(): React.JSX.Element {
       </Stack>
 
       <Mobile>
-        <BottomNav>
-          <BottomNavigationAction
-            href={paths.dashboard.users}
-            label="Add"
-            icon={<AddIcon />}
-          />
-        </BottomNav>
+        <BottomNav></BottomNav>
       </Mobile>
     </>
   )

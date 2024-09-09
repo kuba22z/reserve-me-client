@@ -5,7 +5,6 @@ import { ReactNode } from 'react'
 import BottomNavigation from '@mui/material/BottomNavigation'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction/BottomNavigationAction'
 import Paper from '@mui/material/Paper'
-import FavoriteIcon from '@mui/icons-material/Favorite'
 import Box from '@mui/material/Box'
 import PeopleIcon from '@mui/icons-material/People'
 import { paths } from '@/paths'
@@ -44,7 +43,7 @@ export function BottomNav({
             label="Home"
             icon={<HomeIcon />}
           />
-          <BottomNavigationAction label="Favorites" icon={<FavoriteIcon />} />
+          {/*<BottomNavigationAction label="Favorites" icon={<FavoriteIcon />} />*/}
           {children}
           <BottomNavigationAction
             href={paths.dashboard.account}

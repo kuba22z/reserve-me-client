@@ -1,15 +1,7 @@
 'use client'
 import * as React from 'react'
 import { MouseEvent, useState } from 'react'
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  CardHeader,
-  Container,
-  Divider,
-} from '@mui/material'
-
+import { Button, ButtonGroup, Divider } from '@mui/material'
 import {
   Calendar,
   type Event,
@@ -24,18 +16,16 @@ import EventInfoModal from './EventInfoModal'
 import { AddTodoModal } from './AddTodoModal'
 import AddDatePickerEventModal from './AddDatePickerEventModal'
 import 'moment/locale/de'
-import {
-  CounterDto,
-  CreateMeetingDto,
-  LocationDto,
-  MeetingDto,
-  UserDto,
-} from '@/gql/__generated__/types'
+import { LocationDto, MeetingDto, UserDto } from '@/gql/__generated__/types'
 import EventInfo from '@/components/dashboard/calendar/EventInfo'
 import { useUserContext } from '@/components/core/UserProvider'
 import { BottomNav } from '@/components/dashboard/layout/bottom-nav'
 import AddIcon from '@mui/icons-material/Add'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction/BottomNavigationAction'
+import { createMeeting } from '@/operations/meeting/createMeetings'
+import { deleteMeetings } from '@/operations/meeting/deleteMeetings'
+import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
+import { DashboardAccessLevels } from '@/role-permissions'
 
 // const locales = {
 //   "en-US": enUS,
@@ -82,15 +72,11 @@ interface EventCalendarProps {
   meetings: ReadonlyArray<MeetingDto>
   users: ReadonlyArray<UserDto>
   locations: ReadonlyArray<LocationDto>
-  createMeeting: (meeting: CreateMeetingDto) => Promise<MeetingDto>
-  deleteMeetings: (ids: number[]) => Promise<CounterDto>
 }
 
 function EventCalendarMobile({
   meetings,
   locations,
-  createMeeting,
-  deleteMeetings,
   users,
 }: Readonly<EventCalendarProps>) {
   const user = useUserContext()
@@ -100,6 +86,7 @@ function EventCalendarMobile({
   const [currentEvent, setCurrentEvent] = useState<Event | IEventInfo | null>(
     null
   )
+  const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
 
   const [eventInfoModal, setEventInfoModal] = useState(false)
 
@@ -128,7 +115,7 @@ function EventCalendarMobile({
 
   const initialEventFormState = {
     users: users,
-    selectedUserNames: [],
+    selectedUserNames: accessLevel.createOther ? [] : [user.userName],
     locations: locations,
     selectedLocation: null,
     todoId: undefined,
@@ -139,7 +126,7 @@ function EventCalendarMobile({
 
   const initialDatePickerEventFormData: DatePickerEventFormData = {
     users: users,
-    selectedUserNames: [],
+    selectedUserNames: accessLevel.createOther ? [] : [user.userName],
     locations: locations,
     selectedLocation: null,
     todoId: undefined,
@@ -247,10 +234,8 @@ function EventCalendarMobile({
       setDatePickerEventFormData(initialDatePickerEventFormData)
     })
   }
-
   const onDeleteEvent = () => {
     const currentEventInfo = currentEvent as IEventInfo
-    console.log(currentEventInfo)
     deleteMeetings([parseInt(currentEventInfo._id)]).then((count) => {
       if (count.count === 1) {
         setShowedEvents(() =>
@@ -264,159 +249,132 @@ function EventCalendarMobile({
   }
   return (
     <>
-      <Box
-        mt={2}
-        mb={2}
-        component="main"
-        sx={{
-          flexGrow: 1,
-          py: 0,
-        }}
+      <h4>Reserve courts and manage them easily</h4>
+      {/*<ButtonGroup*/}
+      {/*  size="medium"*/}
+      {/*  variant="contained"*/}
+      {/*  aria-label="outlined primary button group"*/}
+      {/*>*/}
+      {/*  <Button*/}
+      {/*    onClick={() => {*/}
+      {/*      setOpenDatepickerModal(true)*/}
+      {/*    }}*/}
+      {/*    size="medium"*/}
+      {/*    variant="contained"*/}
+      {/*    startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}*/}
+      {/*  >*/}
+      {/*    Add event*/}
+      {/*  </Button>*/}
+      {/*</ButtonGroup>*/}
+      <ButtonGroup
+        size="small"
+        variant="contained"
+        aria-label="outlined primary button group"
       >
-        <Container maxWidth={false}>
-          <CardHeader
-            title="Calendar"
-            subheader="Create Events and Todos and manage them easily"
-          />
-          <Divider />
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: 0,
-            }}
-          >
-            {/*<ButtonGroup*/}
-            {/*  size="medium"*/}
-            {/*  variant="contained"*/}
-            {/*  aria-label="outlined primary button group"*/}
-            {/*>*/}
-            {/*  <Button*/}
-            {/*    onClick={() => {*/}
-            {/*      setOpenDatepickerModal(true)*/}
-            {/*    }}*/}
-            {/*    size="medium"*/}
-            {/*    variant="contained"*/}
-            {/*    startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}*/}
-            {/*  >*/}
-            {/*    Add event*/}
-            {/*  </Button>*/}
-            {/*</ButtonGroup>*/}
-            <ButtonGroup
-              size="medium"
-              variant="contained"
-              aria-label="outlined primary button group"
-            >
-              <Button
-                onClick={() => {
-                  console.log(events)
-                  setShowedEvents(
-                    events.filter((e) =>
-                      e.users.map((user) => user.id).includes(user.id)
-                    )
-                  )
-                }}
-                size="small"
-                variant="contained"
-              >
-                My Meetings
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowedEvents(events)
-                }}
-                size="small"
-                variant="contained"
-              >
-                Total
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowedEvents(
-                    events.filter((e) => e.location.name === 'Upper Court')
-                  )
-                }}
-                size="small"
-                variant="contained"
-                style={{ backgroundColor: upperCourtColor }}
-              >
-                Upper Court
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowedEvents(
-                    events.filter((e) => e.location.name === 'Lower Court')
-                  )
-                }}
-                size="small"
-                variant="contained"
-                style={{ backgroundColor: lowerCourtColor }}
-              >
-                Lower Court
-              </Button>
-            </ButtonGroup>
-          </Box>
-          <Divider style={{ margin: 10 }} />
-          <AddEventModal
-            open={openSlot}
-            handleClose={handleClose}
-            eventFormData={eventFormData}
-            setEventFormData={setEventFormData}
-            onAddEvent={onAddEvent}
-            todos={todos}
-          />
-          <AddDatePickerEventModal
-            open={openDatepickerModal}
-            handleClose={handleDatePickerClose}
-            datePickerEventFormData={datePickerEventFormData}
-            setDatePickerEventFormData={setDatePickerEventFormData}
-            onAddEvent={onAddEventFromDatePicker}
-            todos={todos}
-          />
-          <EventInfoModal
-            open={eventInfoModal}
-            handleClose={() => {
-              setEventInfoModal(false)
-            }}
-            onDeleteEvent={onDeleteEvent}
-            currentEvent={currentEvent as IEventInfo}
-          />
-          <AddTodoModal
-            open={openTodoModal}
-            handleClose={() => {
-              setOpenTodoModal(false)
-            }}
-            todos={todos}
-            setTodos={setTodos}
-          />
-          <Calendar
-            localizer={localizer}
-            events={showedEvents}
-            onSelectEvent={handleSelectEvent}
-            onSelectSlot={handleSelectSlot}
-            selectable
-            startAccessor="start"
-            components={{ event: EventInfo }}
-            endAccessor="end"
-            defaultView={Views.WEEK}
-            eventPropGetter={(event) => {
-              const color =
-                event.location.name === 'Upper Court'
-                  ? upperCourtColor
-                  : lowerCourtColor
-              return {
-                style: {
-                  backgroundColor: color,
-                  borderColor: color,
-                },
-              }
-            }}
-            style={{
-              height: 1150,
-            }}
-          />
-        </Container>
-      </Box>
+        <Button
+          onClick={() => {
+            setShowedEvents(
+              events.filter((e) =>
+                e.users.map((user) => user.id).includes(user.id)
+              )
+            )
+          }}
+          variant="contained"
+        >
+          My Meetings
+        </Button>
+        <Button
+          onClick={() => {
+            setShowedEvents(events)
+          }}
+          variant="contained"
+        >
+          Total
+        </Button>
+        <Button
+          onClick={() => {
+            setShowedEvents(
+              events.filter((e) => e.location.name === 'location2')
+            )
+          }}
+          variant="contained"
+          style={{ backgroundColor: upperCourtColor }}
+        >
+          Upper Court
+        </Button>
+        <Button
+          onClick={() => {
+            setShowedEvents(
+              events.filter((e) => e.location.name === 'location1')
+            )
+          }}
+          variant="contained"
+          style={{ backgroundColor: lowerCourtColor }}
+        >
+          Lower Court
+        </Button>
+      </ButtonGroup>
+      <Divider style={{ margin: 10 }} />
+      <AddEventModal
+        open={openSlot}
+        handleClose={handleClose}
+        eventFormData={eventFormData}
+        setEventFormData={setEventFormData}
+        onAddEvent={onAddEvent}
+        todos={todos}
+      />
+      <AddDatePickerEventModal
+        open={openDatepickerModal}
+        handleClose={handleDatePickerClose}
+        datePickerEventFormData={datePickerEventFormData}
+        setDatePickerEventFormData={setDatePickerEventFormData}
+        onAddEvent={onAddEventFromDatePicker}
+        todos={todos}
+      />
+      <EventInfoModal
+        open={eventInfoModal}
+        handleClose={() => {
+          setEventInfoModal(false)
+        }}
+        onDeleteEvent={onDeleteEvent}
+        currentEvent={currentEvent as IEventInfo}
+      />
+      <AddTodoModal
+        open={openTodoModal}
+        handleClose={() => {
+          setOpenTodoModal(false)
+        }}
+        todos={todos}
+        setTodos={setTodos}
+      />
+      <Calendar
+        localizer={localizer}
+        events={showedEvents}
+        onSelectEvent={handleSelectEvent}
+        onSelectSlot={handleSelectSlot}
+        selectable
+        startAccessor="start"
+        endAccessor={'end'}
+        components={{ event: EventInfo }}
+        scrollToTime={localizer.startOf(new Date(), 'day')}
+        defaultView={Views.DAY}
+        views={[Views.DAY]}
+        eventPropGetter={(event) => {
+          const color =
+            event.location.name === 'Upper Court'
+              ? upperCourtColor
+              : lowerCourtColor
+          return {
+            style: {
+              backgroundColor: color,
+              borderColor: color,
+            },
+          }
+        }}
+        style={{
+          height: 1150,
+        }}
+      />
       <BottomNav>
         <BottomNavigationAction
           onClick={() => setOpenDatepickerModal(true)}

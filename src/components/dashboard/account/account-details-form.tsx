@@ -11,7 +11,7 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import OutlinedInput from '@mui/material/OutlinedInput'
 import Grid from '@mui/material/Unstable_Grid2'
-import { createUser } from '@/operations/create-user'
+import { createUser } from '@/operations/user/create-user'
 
 const states = [
   { value: 'alabama', label: 'Alabama' },

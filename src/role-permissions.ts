@@ -83,6 +83,9 @@ const accessLevelMap: AccessLevelByRole = {
       createOwn: true,
       createOther: true,
     },
+    [paths.dashboard.account]: {
+      showOtherUsers: true,
+    },
   },
   [CognitoGroupDto.Employee]: {
     [paths.dashboard.overview]: {
@@ -92,6 +95,9 @@ const accessLevelMap: AccessLevelByRole = {
       deleteOther: true,
       createOwn: true,
       createOther: true,
+    },
+    [paths.dashboard.account]: {
+      showOtherUsers: true,
     },
   },
   [CognitoGroupDto.Client]: {
@@ -103,10 +109,13 @@ const accessLevelMap: AccessLevelByRole = {
       createOwn: true,
       createOther: false,
     },
+    [paths.dashboard.account]: {
+      showOtherUsers: false,
+    },
   },
 }
 
-type DashboardAccessLevels = {
+export type DashboardAccessLevels = {
   editOwn: boolean
   editOther: boolean
   deleteOwn: boolean
@@ -115,8 +124,14 @@ type DashboardAccessLevels = {
   createOther: boolean
 }
 
+export type AccountAccessLevels = {
+  showOtherUsers: boolean
+}
+
 type AccessLevelByPath = {
   [T in typeof paths.dashboard.overview]: DashboardAccessLevels
+} & {
+  [T in typeof paths.dashboard.account]: AccountAccessLevels
 }
 
 type AccessLevelByRole = {
