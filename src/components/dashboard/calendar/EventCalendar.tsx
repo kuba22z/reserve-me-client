@@ -302,7 +302,7 @@ function EventCalendar({
                       )
                     )
                   }}
-                  size="small"
+                  size="medium"
                   variant="contained"
                 >
                   My Meetings
@@ -311,7 +311,7 @@ function EventCalendar({
                   onClick={() => {
                     setShowedEvents(events)
                   }}
-                  size="small"
+                  size="medium"
                   variant="contained"
                 >
                   Total
@@ -322,7 +322,7 @@ function EventCalendar({
                       events.filter((e) => e.location.name === 'location2')
                     )
                   }}
-                  size="small"
+                  size="medium"
                   variant="contained"
                   style={{ backgroundColor: upperCourtColor }}
                 >
@@ -334,7 +334,7 @@ function EventCalendar({
                       events.filter((e) => e.location.name === 'location1')
                     )
                   }}
-                  size="small"
+                  size="medium"
                   variant="contained"
                   style={{ backgroundColor: lowerCourtColor }}
                 >
