@@ -17,9 +17,6 @@ import NextLink from 'next/link'
 import { GetLocationDocument } from '@/gql/queries/get-location.generated'
 import React from 'react'
 import { addLocation } from '@/operations/addLocation'
-import { LocationsVar } from '@/components/LocationsVar'
-import MyButtonStore from '@/components/MyButtonStore'
-import { LocationsStore } from '@/components/LocationsStore'
 
 function MissingAuthorizationCodeFallback() {
   return <>Fail</>
@@ -72,14 +69,14 @@ export default async function Home({
         {/*<div>{user ? user.userName : ''}</div>*/}
         {/*<Locations locations={locations}></Locations>*/}
         <h3>Location Var</h3>
-        <LocationsVar></LocationsVar>
-        <h3>Location Store</h3>
-        <LocationsStore></LocationsStore>
+        {/*<LocationsVar></LocationsVar>*/}
+        {/*<h3>Location Store</h3>*/}
+        {/*<LocationsStore></LocationsStore>*/}
         <FormControl>
           {/*<MyButton onClick={logout}>logout</MyButton>*/}
           {/*<MyButton onClick={createLocation}>create Location</MyButton>*/}
           {/*<MyButtonClient>create Location</MyButtonClient>*/}
-          <MyButtonStore>create Location 2</MyButtonStore>
+          {/*<MyButtonStore>create Location 2</MyButtonStore>*/}
         </FormControl>
       </Box>
       <BottomNavigation showLabels>

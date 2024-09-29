@@ -2,7 +2,7 @@
 # https://the-guild.dev/graphql/codegen/plugins/typescript/typescript-react-apollo
 overwrite: true
 schema: "http://localhost:3000/graphql"
-watch: true
+watch: false
 generates:
   src/gql/__generated__/types.tsx:
     documents: 'src/**/*.{tsx,gql,graphql}'
