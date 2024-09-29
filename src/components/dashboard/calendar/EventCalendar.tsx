@@ -33,8 +33,8 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus'
 import { useUserContext } from '@/components/core/UserProvider'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
 import { DashboardAccessLevels } from '@/role-permissions'
-import { deleteMeetings } from '@/operations/meeting/deleteMeetings'
-import { createMeeting } from '@/operations/meeting/createMeetings'
+import { deleteMeetings } from '@/operations/meeting/delete-meetings'
+import { createMeeting } from '@/operations/meeting/create-meetings'
 
 // const locales = {
 //   "en-US": enUS,

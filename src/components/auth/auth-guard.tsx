@@ -5,7 +5,8 @@ import { logger } from '@/lib/default-logger'
 import { getClient } from '@/gql/client'
 import { GetUserDocument } from '@/gql/queries/get-user.generated'
 import { CognitoGroupDto } from '@/gql/__generated__/types'
-import { externalUrl } from '@/config'
+
+import { getLoginUrl } from '@/operations/auth/get-login-url'
 
 //export type CognitoGroupStringDto = `${CognitoGroupDto}`
 
@@ -26,10 +27,10 @@ export async function AuthGuard({
     query: GetUserDocument,
     fetchPolicy: 'network-only',
   })
-  const checkPermissions = () => {
+  const checkPermissions = async () => {
     if (error) {
       logger.debug('[AuthGuard]: User is not logged in, redirecting to sign in')
-      redirect(externalUrl.login)
+      redirect(await getLoginUrl())
     }
 
     if (
@@ -39,10 +40,10 @@ export async function AuthGuard({
       logger.debug(
         '[AuthGuard]: User has not the required roles, redirecting to sign in'
       )
-      redirect(externalUrl.login)
+      redirect(await getLoginUrl())
     }
   }
-  checkPermissions()
+  await checkPermissions()
   // if (error) {
   //   return <Alert color="error">{error.message}</Alert>
   // }

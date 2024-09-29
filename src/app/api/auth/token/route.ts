@@ -1,28 +1,19 @@
-import { NextApiRequest } from 'next'
-import { GetTokenDocument } from '@/gql/queries/get-token.generated'
-import { GrantTypeDto, TokenRequestDto } from '@/gql/__generated__/types'
+import { GrantTypeDto } from '@/gql/__generated__/types'
 import { redirect } from 'next/navigation'
-import { getClientNoAuth } from '@/gql/clientNoAuth'
 import { CookieToken } from '@/app/utils/auth/cookie-token'
 import { paths } from '@/paths'
+import { getToken } from '@/operations/auth/get-token'
+import { NextRequest } from 'next/server'
 
-export async function GET(req: NextApiRequest) {
+export async function GET(req: NextRequest | Request) {
   if (!req.url) {
     throw Error
   }
   const code = new URL(req.url).searchParams.get('code')
-  const tokens = await getTokenGraphql({
+  const tokens = await getToken({
     authorizationCode: code,
     grantType: GrantTypeDto.AuthorizationCode,
   })
   CookieToken.setTokenDto(tokens)
   redirect(paths.dashboard.overview)
-}
-
-export const getTokenGraphql = async (tokenRequest: TokenRequestDto) => {
-  const { data, error, errors, networkStatus } = await getClientNoAuth().query({
-    query: GetTokenDocument,
-    variables: { tokenRequest },
-  })
-  return data.accessToken
 }

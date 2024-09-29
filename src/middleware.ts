@@ -5,15 +5,10 @@ import {
   ResponseCookies,
 } from 'next/dist/compiled/@edge-runtime/cookies'
 import { CookieToken } from '@/app/utils/auth/cookie-token'
-import {
-  GrantTypeDto,
-  TokenDto,
-  TokenRequestDto,
-} from './gql/__generated__/types'
-import { GetTokenDocument } from '@/gql/queries/get-token.generated'
-import { getClientNoAuth } from '@/gql/clientNoAuth'
-import { externalUrl } from '@/config'
+import { GrantTypeDto, TokenDto } from './gql/__generated__/types'
 import { RolePermissions } from '@/role-permissions'
+import { getToken } from '@/operations/auth/get-token'
+import { getLoginUrl } from '@/operations/auth/get-login-url'
 
 const PUBLIC_FILE = /\.(.*)$/
 
@@ -36,7 +31,7 @@ export async function middleware(request: NextRequest) {
     const hasAccess = CookieToken.getTokenRole().some((group) =>
       RolePermissions.hasAccess(group, pathname)
     )
-    if (!hasAccess) return NextResponse.redirect(externalUrl.login)
+    if (!hasAccess) return NextResponse.redirect(await getLoginUrl())
 
     return NextResponse.next()
   }
@@ -44,14 +39,14 @@ export async function middleware(request: NextRequest) {
 
   if (!refreshToken) {
     console.log('refreshToken is null')
-    return NextResponse.redirect(externalUrl.login)
+    return NextResponse.redirect(await getLoginUrl())
   }
   const tokens = await requestToken(refreshToken)
   return responseWithAccessToken(request, tokens)
 }
 
 export async function requestToken(refreshToken: string): Promise<TokenDto> {
-  return await getTokenGraphql({
+  return await getToken({
     refreshToken: refreshToken,
     grantType: GrantTypeDto.RefreshToken,
   })
@@ -69,14 +64,6 @@ export const responseWithAccessToken = (
   // merged to the stable version
   applySetCookie(request, response)
   return response
-}
-
-export const getTokenGraphql = async (tokenRequest: TokenRequestDto) => {
-  const { data, error, errors, networkStatus } = await getClientNoAuth().query({
-    query: GetTokenDocument,
-    variables: { tokenRequest },
-  })
-  return data.accessToken
 }
 
 /**

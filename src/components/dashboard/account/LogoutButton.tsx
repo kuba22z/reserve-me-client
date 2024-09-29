@@ -2,7 +2,7 @@
 
 import { ButtonGroup, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
-import { logout } from '@/operations/logout'
+import { logout } from '@/operations/auth/logout'
 import * as React from 'react'
 import { paths } from '@/paths'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
