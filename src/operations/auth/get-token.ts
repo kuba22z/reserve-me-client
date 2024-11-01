@@ -9,5 +9,8 @@ export const getToken = async (tokenRequest: TokenRequestDto) => {
     query: GetTokenDocument,
     variables: { tokenRequest },
   })
+  if (error) {
+    throw error
+  }
   return data.accessToken
 }

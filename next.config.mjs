@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+import * as dotenv from 'dotenv'
+
+dotenv.config({path: './.env.'+ process.env.NODE_ENV})
+
 const nextConfig = {
   // reactStrictMode must be false to fix a bug in react-big-calendar
   reactStrictMode: false,
