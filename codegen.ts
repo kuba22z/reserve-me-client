@@ -34,7 +34,7 @@ const config: CodegenConfig = {
   config: {
     constEnums: true,
     immutableTypes: true,
-    avoidOptionals: true,
+    avoidOptionals: false,
   },
 }
 

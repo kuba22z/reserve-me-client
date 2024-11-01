@@ -5,7 +5,7 @@
   "scripts": {
     "start:local": "concurrently \"NODE_OPTIONS='--inspect' NODE_ENV=local next dev -p 4200\" \"yarn generate --watch\"   ",
     "start:dev": "NODE_OPTIONS='--inspect' NODE_ENV=test next dev -p 4200",
-    "build": "next build",
+    "build": "yarn generate && next build",
     "start": "next start -p 4200",
     "generate": "graphql-codegen",
     "prebuild": "yarn generate",
