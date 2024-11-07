@@ -113,7 +113,7 @@ export namespace CookieToken {
       // sameSite: 'strict',
       secure: true,
       path: '/',
-      domain: '.localhost',
+      //domain: '.localhost',
     }
   }
 }

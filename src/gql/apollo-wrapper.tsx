@@ -8,11 +8,12 @@ import {
   NextSSRInMemoryCache,
   SSRMultipartLink,
 } from '@apollo/experimental-nextjs-app-support/ssr'
+import { EnvVariables } from '../../envConfig'
 
 // apollo client for client components
 function makeClient() {
   const httpLink = new HttpLink({
-    uri: 'http://localhost:3000/graphql',
+    uri: EnvVariables.serverUrl,
   })
   return new NextSSRApolloClient({
     cache: new NextSSRInMemoryCache(),
