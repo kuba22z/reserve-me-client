@@ -109,10 +109,10 @@ export namespace CookieToken {
       name: key,
       value: value,
       maxAge: maxAgeInSec,
-      //httpOnly: true,
+      httpOnly: true,
       // sameSite: 'strict',
-      // secure: true,
-      //path: '/',
+      secure: true,
+      path: '/',
       //domain: '.localhost',
     }
   }
