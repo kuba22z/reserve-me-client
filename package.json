@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start:local": "concurrently \"NODE_OPTIONS='--inspect' NODE_ENV=local next dev -p 4200\" \"yarn generate --watch\"   ",
-    "start:dev": "NODE_OPTIONS='--inspect' NODE_ENV=test next dev -p 4200",
     "build": "yarn generate && next build",
-    "start": "next start -p 4200",
+    "start:prod": "next start -p 4200",
+
+    "start:local": "concurrently \"NODE_OPTIONS='--inspect' NODE_ENV=local next dev -p 4200\" \"yarn generate --watch\"",
+    "start:dev": "NODE_OPTIONS='--inspect' NODE_ENV=test next dev -p 4200",
+
     "generate": "graphql-codegen",
     "prebuild": "yarn generate",
     "lint": "next lint"
