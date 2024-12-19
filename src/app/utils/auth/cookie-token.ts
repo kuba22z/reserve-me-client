@@ -9,26 +9,28 @@ const TokenRoleKey = 'tokenRole'
 export namespace CookieToken {
   const ThirtyDaysInSec = 2592000
 
-  export const setTokenDto = (credentials: TokenDto) => {
+  export const setTokenDto = async (credentials: TokenDto) => {
     // default expires in = 60 minutes
-    set('accessToken', credentials.accessToken, credentials.expiresIn)
+    await set('accessToken', credentials.accessToken, credentials.expiresIn)
     if (credentials.refreshToken) {
       set('refreshToken', credentials.refreshToken, ThirtyDaysInSec)
     }
-    set('idToken', credentials.idToken, credentials.expiresIn)
-    setTokenRole(credentials.groups)
+    await set('idToken', credentials.idToken, credentials.expiresIn)
+    await setTokenRole(credentials.groups)
   }
 
   export const get = (key: CookieTokenKey) => {
-    return cookies().get(key)?.value
+    return cookies().then((a) => a.get(key)?.value)
   }
 
-  export const getTokenRole = () => {
-    return stringToCognitoGroupDto(cookies().get(TokenRoleKey)?.value)
+  export const getTokenRole = async () => {
+    return stringToCognitoGroupDto(
+      await cookies().then((cookies) => cookies.get(TokenRoleKey)?.value)
+    )
   }
 
   export const remove = (key: CookieTokenKey) => {
-    return cookies().delete(key)
+    return cookies().then((cookies) => cookies.delete(key))
   }
 
   export const setTokenDtoInResponse = (
@@ -84,11 +86,19 @@ export namespace CookieToken {
     return groups.map((a) => a.toString()).join(',')
   }
 
-  const set = (key: CookieTokenKey, value: string, maxAgeInSec: number) => {
-    cookies().set(cookieConfig(key, value, maxAgeInSec))
+  const set = async (
+    key: CookieTokenKey,
+    value: string,
+    maxAgeInSec: number
+  ) => {
+    await cookies().then((cookies) =>
+      cookies.set(cookieConfig(key, value, maxAgeInSec))
+    )
   }
-  const setTokenRole = (groups: ReadonlyArray<CognitoGroupDto>) => {
-    cookies().set(TokenRoleKey, cognitoGroupDtoToString(groups))
+  const setTokenRole = async (groups: ReadonlyArray<CognitoGroupDto>) => {
+    await cookies().then((cookies) =>
+      cookies.set(TokenRoleKey, cognitoGroupDtoToString(groups))
+    )
   }
 
   const setInResponse = (

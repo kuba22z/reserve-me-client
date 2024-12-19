@@ -15,7 +15,6 @@ export const useLocationStore = create<LocationState>((set, get) => ({
   locations: [],
   getLocations: async () =>
     getLocations().then((a) => {
-      console.log(a)
       set({ locations: [...a] })
     }),
   addLocation2: async () =>

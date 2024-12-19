@@ -8,7 +8,7 @@ interface MobileProps {
 }
 
 const Mobile: React.FC<MobileProps> = async ({ children }) => {
-  const isMobile = isMobileDevice()
+  const isMobile = await isMobileDevice()
 
   return <>{isMobile ? children : <></>}</>
 }

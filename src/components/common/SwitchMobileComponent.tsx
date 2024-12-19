@@ -6,11 +6,11 @@ interface SwitchMobileComponentProps {
   mobileChild: React.ReactNode
 }
 
-const SwitchMobileComponent: React.FC<SwitchMobileComponentProps> = ({
+const SwitchMobileComponent: React.FC<SwitchMobileComponentProps> = async ({
   stationaryChild,
   mobileChild,
 }) => {
-  const isMobile = isMobileDevice()
+  const isMobile = await isMobileDevice()
 
   return <>{isMobile ? mobileChild : stationaryChild}</>
 }

@@ -5,8 +5,8 @@ interface StationaryProps {
   children: React.ReactNode
 }
 
-const Stationary: React.FC<StationaryProps> = ({ children }) => {
-  const isMobile = isMobileDevice()
+const Stationary: React.FC<StationaryProps> = async ({ children }) => {
+  const isMobile = await isMobileDevice()
   return <>{!isMobile ? children : <></>}</>
 }
 

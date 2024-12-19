@@ -12,7 +12,5 @@ export async function getLoginUrl() {
       console.error('Server is not available')
       throw e
     })
-  console.log('login:')
-  console.log(data)
   return data.login
 }

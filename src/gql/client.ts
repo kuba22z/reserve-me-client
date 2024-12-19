@@ -1,25 +1,41 @@
-import { ApolloClient, ApolloLink, concat, HttpLink } from '@apollo/client'
+import {
+  ApolloClient,
+  ApolloLink,
+  concat,
+  fromPromise,
+  HttpLink,
+  Observable,
+} from '@apollo/client'
 import { registerApolloClient } from '@apollo/experimental-nextjs-app-support/rsc'
 import { GraphqlConfig } from '@/gql/graphql-config'
 import { CookieToken } from '@/app/utils/auth/cookie-token'
 import { cache } from '@/gql/cache'
 
 const authMiddleware = new ApolloLink((operation, forward) => {
-  const accessToken = CookieToken.get('accessToken')
+  return fromPromise(
+    CookieToken.get('accessToken').then((accessToken) => {
+      if (!accessToken) {
+        return null
+      }
+      operation.setContext(({ headers = {} }) => ({
+        headers: {
+          ...headers,
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }))
 
-  if (!accessToken) {
-    console.error('access token in auth Middleware is null')
-  }
-  // add the authorization to the headers
-  operation.setContext(({ headers = {} }) => {
-    return {
-      headers: {
-        ...headers,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      return accessToken
+    })
+  ).flatMap((accessToken) => {
+    if (!accessToken) {
+      // Terminate the request by returning an empty Observable
+      console.error('Access token in auth middleware is null')
+      return new Observable((observer) => {
+        observer.error(new Error('Request terminated: Missing access token'))
+      })
     }
+    return forward(operation)
   })
-  return forward(operation)
 })
 
 // apollo client for server side components

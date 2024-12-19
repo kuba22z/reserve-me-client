@@ -13,8 +13,8 @@ export const logout = async () => {
     return
   }
 
-  CookieToken.remove('accessToken')
-  CookieToken.remove('refreshToken')
+  await CookieToken.remove('accessToken')
+  await CookieToken.remove('refreshToken')
   //refresh page -> shows login page
   redirect('/dashboard')
 }

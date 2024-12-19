@@ -27,7 +27,7 @@ export default async function Page(): Promise<React.JSX.Element> {
         <Stack direction="row" spacing={3}>
           <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
             <Typography variant="h4">Users</Typography>
-            <UserOperations isMobile={isMobileDevice()} />
+            <UserOperations isMobile={await isMobileDevice()} />
           </Stack>
         </Stack>
         <UsersTable users={data.usersByGroup} />

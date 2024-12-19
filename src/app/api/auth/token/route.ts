@@ -14,6 +14,6 @@ export async function GET(req: NextRequest | Request) {
     authorizationCode: code,
     grantType: GrantTypeDto.AuthorizationCode,
   })
-  CookieToken.setTokenDto(tokens)
+  await CookieToken.setTokenDto(tokens)
   redirect(paths.dashboard.overview)
 }

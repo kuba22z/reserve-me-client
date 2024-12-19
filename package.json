@@ -5,10 +5,8 @@
   "scripts": {
     "build": "yarn generate && next build",
     "start:prod": "next start -p 4200",
-
-    "start:local": "concurrently \"NODE_OPTIONS='--inspect' NODE_ENV=local next dev -p 4200\" \"yarn generate --watch\"",
+    "start:local": "concurrently \"NODE_OPTIONS='--inspect' NODE_ENV=development next dev -p 4200\" \"yarn generate --watch\"",
     "start:dev": "NODE_OPTIONS='--inspect' NODE_ENV=test next dev -p 4200",
-
     "generate": "graphql-codegen",
     "prebuild": "yarn generate",
     "lint": "next lint"
@@ -27,14 +25,14 @@
     "@mui/types": "^7.2.14",
     "@mui/utils": "5.15.20",
     "@mui/x-date-pickers": "^7.7.0",
-    "@next/env": "^15.0.2",
+    "@next/env": "^15.1.1",
     "@phosphor-icons/react": "^2.1.6",
     "@types/react-big-calendar": "^1.8.9",
     "@types/ua-parser-js": "^0.7.39",
     "date-fns": "2.30.0",
     "dayjs": "^1.11.11",
     "graphql": "^16.8.2",
-    "next": "14.2.4",
+    "next": "15.1.1",
     "react": "^18",
     "react-big-calendar": "^1.13.0",
     "react-colorful": "^5.6.1",
