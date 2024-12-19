@@ -8,8 +8,10 @@ interface IProps {
 const EventInfo = ({ event }: IProps) => {
   return (
     <>
-      <Typography>{event.users.map((a) => a.name).join(',')}</Typography>
-      <Typography>{event.location.name}</Typography>
+      <Typography sx={{ lineHeight: '1.25' }}>
+        {event.users.map((a) => a.name).join(',')}
+      </Typography>
+      <Typography sx={{ lineHeight: '1.25' }}>{event.location.name}</Typography>
     </>
   )
 }

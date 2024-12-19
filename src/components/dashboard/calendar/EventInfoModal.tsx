@@ -1,11 +1,9 @@
 import { Dispatch, MouseEvent, SetStateAction } from 'react'
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Typography,
 } from '@mui/material'
@@ -37,27 +35,35 @@ const EventInfoModal = ({
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Event Info</DialogTitle>
       <DialogContent>
-        <DialogContentText>
+        <Typography
+          sx={{ fontSize: 14, marginTop: 3 }}
+          color="text.secondary"
+          gutterBottom
+        >
+          {currentEvent && currentEvent.users
+            ? currentEvent.users.map((a) => a.name).join(',')
+            : ''}
+        </Typography>
+        <Typography
+          sx={{ fontSize: 14, marginTop: 3 }}
+          color="text.secondary"
+          gutterBottom
+        >
+          {currentEvent && currentEvent.location
+            ? currentEvent.location.name
+            : ''}
+        </Typography>
+        {currentEvent && currentEvent.notes ? (
           <Typography
             sx={{ fontSize: 14, marginTop: 3 }}
             color="text.secondary"
             gutterBottom
           >
-            {currentEvent && currentEvent.users
-              ? currentEvent.users.map((a) => a.name).join(',')
-              : ''}
+            Notes: {currentEvent.notes}
           </Typography>
-          <Typography
-            sx={{ fontSize: 14, marginTop: 3 }}
-            color="text.secondary"
-            gutterBottom
-          >
-            {currentEvent && currentEvent.location
-              ? currentEvent.location.name
-              : ''}
-          </Typography>
-        </DialogContentText>
-        <Box component="form"></Box>
+        ) : (
+          <></>
+        )}
       </DialogContent>
       <DialogActions>
         <Button color="error" onClick={onClose}>

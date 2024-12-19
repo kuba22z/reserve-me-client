@@ -46,6 +46,7 @@ const AddDatePickerEventModal = ({
     start,
     end,
     allDay,
+    notes,
   } = datePickerEventFormData
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
@@ -101,12 +102,12 @@ const AddDatePickerEventModal = ({
         </DialogContentText>
         <Box component="form">
           <TextField
-            name="description"
-            value={''}
+            name="notes"
+            value={notes}
             margin="dense"
             required={false}
-            id="description"
-            label="Description"
+            id="notes"
+            label="Notes"
             type="text"
             fullWidth
             variant="outlined"

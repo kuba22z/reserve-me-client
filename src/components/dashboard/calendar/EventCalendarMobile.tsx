@@ -25,7 +25,7 @@ import BottomNavigationAction from '@mui/material/BottomNavigationAction/BottomN
 import { createMeeting } from '@/operations/meeting/create-meetings'
 import { deleteMeetings } from '@/operations/meeting/delete-meetings'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
-import { DashboardAccessLevels } from '@/role-permissions'
+import { DashboardAccessLevels } from '@/role-permissions' // const locales = {
 
 // const locales = {
 //   "en-US": enUS,
@@ -44,9 +44,11 @@ export interface IEventInfo extends Event {
   users: UserDto[]
   location: LocationDto
   todoId?: string
+  notes: string
 }
 
 export interface EventFormData {
+  notes: string
   users: ReadonlyArray<UserDto>
   locations: ReadonlyArray<LocationDto>
   selectedLocation: LocationDto | null
@@ -55,6 +57,7 @@ export interface EventFormData {
 }
 
 export interface DatePickerEventFormData {
+  notes: string
   users: ReadonlyArray<UserDto>
   selectedUserNames: string[]
   locations: ReadonlyArray<LocationDto>
@@ -106,6 +109,7 @@ function EventCalendarMobile({
           resource: null,
           users: getUsersDtoByUserNames(m.userNames),
           location: schedule.location,
+          notes: m.notes,
         }
       })
     })
@@ -114,6 +118,7 @@ function EventCalendarMobile({
   const [todos, setTodos] = useState<ITodo[]>([])
 
   const initialEventFormState = {
+    notes: '',
     users: users,
     selectedUserNames: accessLevel.createOther ? [] : [user.userName],
     locations: locations,
@@ -125,6 +130,7 @@ function EventCalendarMobile({
   )
 
   const initialDatePickerEventFormData: DatePickerEventFormData = {
+    notes: '',
     users: users,
     selectedUserNames: accessLevel.createOther ? [] : [user.userName],
     locations: locations,
@@ -170,6 +176,7 @@ function EventCalendarMobile({
         locationId: eventFormData.selectedLocation!.id,
       },
       userNames: eventFormData.selectedUserNames,
+      notes: eventFormData.notes,
     }).then((meeting) => {
       const {
         selectedUserNames,
@@ -216,6 +223,7 @@ function EventCalendarMobile({
         locationId: datePickerEventFormData.selectedLocation!.id,
       },
       userNames: datePickerEventFormData.selectedUserNames,
+      notes: eventFormData.notes,
     }).then((meeting) => {
       const data: IEventInfo = {
         ...datePickerEventFormData,

@@ -34,7 +34,7 @@ import { useUserContext } from '@/components/core/UserProvider'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
 import { DashboardAccessLevels } from '@/role-permissions'
 import { deleteMeetings } from '@/operations/meeting/delete-meetings'
-import { createMeeting } from '@/operations/meeting/create-meetings'
+import { createMeeting } from '@/operations/meeting/create-meetings' // const locales = {
 
 // const locales = {
 //   "en-US": enUS,
@@ -53,9 +53,11 @@ export interface IEventInfo extends Event {
   users: UserDto[]
   location: LocationDto
   todoId?: string
+  notes: string
 }
 
 export interface EventFormData {
+  notes: string
   users: ReadonlyArray<UserDto>
   locations: ReadonlyArray<LocationDto>
   selectedLocation: LocationDto | null
@@ -64,6 +66,7 @@ export interface EventFormData {
 }
 
 export interface DatePickerEventFormData {
+  notes: string
   users: ReadonlyArray<UserDto>
   selectedUserNames: string[]
   locations: ReadonlyArray<LocationDto>
@@ -115,6 +118,7 @@ function EventCalendar({
           resource: null,
           users: getUsersDtoByUserNames(m.userNames),
           location: schedule.location,
+          notes: m.notes,
         }
       })
     })
@@ -123,6 +127,7 @@ function EventCalendar({
   const [todos, setTodos] = useState<ITodo[]>([])
 
   const initialEventFormState = {
+    notes: '',
     users: users,
     selectedUserNames: accessLevel.createOther ? [] : [user.userName],
     locations: locations,
@@ -134,6 +139,7 @@ function EventCalendar({
   )
 
   const initialDatePickerEventFormData: DatePickerEventFormData = {
+    notes: '',
     users: users,
     selectedUserNames: accessLevel.createOther ? [] : [user.userName],
     locations: locations,
@@ -179,6 +185,7 @@ function EventCalendar({
         locationId: eventFormData.selectedLocation!.id,
       },
       userNames: eventFormData.selectedUserNames,
+      notes: eventFormData.notes,
     }).then((meeting) => {
       const {
         selectedUserNames,
@@ -225,6 +232,7 @@ function EventCalendar({
         locationId: datePickerEventFormData.selectedLocation!.id,
       },
       userNames: datePickerEventFormData.selectedUserNames,
+      notes: datePickerEventFormData.notes,
     }).then((meeting) => {
       const data: IEventInfo = {
         ...datePickerEventFormData,
