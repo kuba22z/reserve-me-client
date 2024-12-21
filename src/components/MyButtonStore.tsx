@@ -1,8 +1,8 @@
 'use client'
-import { Button } from '@mui/base'
 import { useLocationStore } from '@/operations/locationStore'
+import { Button } from '@mui/material'
 
-export default function MyButtonStore({
+export default function MyxButtonStore({
   children,
 }: Readonly<{
   children?: React.ReactNode
