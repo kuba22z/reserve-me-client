@@ -3,18 +3,16 @@ import {
   Autocomplete,
   Box,
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   TextField,
-  Typography,
 } from '@mui/material'
 
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers'
-import { DatePickerEventFormData, ITodo } from './EventCalendar'
+import { DatePickerEventFormData } from './EventCalendar'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -27,7 +25,6 @@ interface IProps {
   datePickerEventFormData: DatePickerEventFormData
   setDatePickerEventFormData: Dispatch<SetStateAction<DatePickerEventFormData>>
   onAddEvent: (e: MouseEvent<HTMLButtonElement>) => void
-  todos: ITodo[]
 }
 
 const AddDatePickerEventModal = ({
@@ -36,7 +33,6 @@ const AddDatePickerEventModal = ({
   datePickerEventFormData,
   setDatePickerEventFormData,
   onAddEvent,
-  todos,
 }: IProps) => {
   const {
     users,
@@ -45,7 +41,6 @@ const AddDatePickerEventModal = ({
     selectedLocation,
     start,
     end,
-    allDay,
     notes,
   } = datePickerEventFormData
   const theme = useTheme()
@@ -62,35 +57,18 @@ const AddDatePickerEventModal = ({
   }
   const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
 
-  const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setDatePickerEventFormData((prevState) => ({
-      ...prevState,
-      allDay: event.target.checked,
-    }))
-  }
-
-  const handleTodoChange = (e: React.SyntheticEvent, value: ITodo | null) => {
-    setDatePickerEventFormData((prevState) => ({
-      ...prevState,
-      todoId: value?._id,
-    }))
-  }
-
   const isDisabled = () => {
     const checkend = () => {
-      if (!allDay && end === null) {
+      if (end === null) {
         return true
       }
     }
-    if (
+    return (
       selectedUserNames.length === 0 ||
       selectedLocation === null ||
       start === null ||
       checkend()
-    ) {
-      return true
-    }
-    return false
+    )
   }
 
   return (
@@ -157,36 +135,27 @@ const AddDatePickerEventModal = ({
             <Box mb={2} mt={5}>
               <DateTimePicker
                 label="Start date"
-                value={start}
+                value={start ?? null}
                 ampm={true}
                 minutesStep={30}
                 onChange={(newValue) =>
                   setDatePickerEventFormData((prevState) => ({
                     ...prevState,
-                    start: new Date(newValue!),
+                    start: newValue ? new Date(newValue) : undefined,
                   }))
                 }
               />
             </Box>
-
-            <Box>
-              <Typography variant="caption" color="text" component={'span'}>
-                All day?
-              </Typography>
-              <Checkbox onChange={handleCheckboxChange} value={allDay} />
-            </Box>
-
             <DateTimePicker
               label="End date"
-              disabled={allDay}
               minDate={start}
               minutesStep={30}
               ampm={true}
-              value={allDay ? null : end}
+              value={end ?? null}
               onChange={(newValue) =>
                 setDatePickerEventFormData((prevState) => ({
                   ...prevState,
-                  end: new Date(newValue!),
+                  end: newValue ? new Date(newValue) : undefined,
                 }))
               }
             />

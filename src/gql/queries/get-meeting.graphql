@@ -1,6 +1,6 @@
 query getMeeting{
     meetings {
-        id,userNames,discount,priceExcepted,priceFinal,priceFull,repeatRate,createdAt,updatedAt,createdByExternalRefId, schedules {
+        id,userNames,discount,priceExcepted,priceFinal,priceFull,repeatRate,createdAt,updatedAt,createdByExternalRefId,notes,schedules {
             id, startDate, endDate,canceled,locationId,location {
                 city,postalCode,id,houseNumber,street,name
             }

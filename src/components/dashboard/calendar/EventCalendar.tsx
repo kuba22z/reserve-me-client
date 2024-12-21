@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { MouseEvent, useState } from 'react'
+import { MouseEvent, useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -22,9 +22,7 @@ import {
 import moment from 'moment-timezone'
 
 import 'react-big-calendar/lib/css/react-big-calendar.css'
-import AddEventModal from './AddEventModal'
 import EventInfoModal from './EventInfoModal'
-import { AddTodoModal } from './AddTodoModal'
 import AddDatePickerEventModal from './AddDatePickerEventModal'
 import 'moment/locale/de'
 import { LocationDto, MeetingDto, UserDto } from '@/gql/__generated__/types'
@@ -34,7 +32,9 @@ import { useUserContext } from '@/components/core/UserProvider'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
 import { DashboardAccessLevels } from '@/role-permissions'
 import { deleteMeetings } from '@/operations/meeting/delete-meetings'
-import { createMeeting } from '@/operations/meeting/create-meetings' // const locales = {
+import { createMeeting } from '@/operations/meeting/create-meetings'
+import { MeetingsFilterMode } from '@/components/dashboard/calendar/FilterMode'
+import AddEventModal from '@/components/dashboard/calendar/AddEventModal'
 
 // const locales = {
 //   "en-US": enUS,
@@ -42,11 +42,6 @@ import { createMeeting } from '@/operations/meeting/create-meetings' // const lo
 // Set the IANA time zone you want to use
 //moment.tz.setDefault('Europe/Paris')
 const localizer = momentLocalizer(moment) // or globalizeLocalizer
-export interface ITodo {
-  _id: string
-  title: string
-  color?: string
-}
 
 export interface IEventInfo extends Event {
   _id: string
@@ -71,14 +66,9 @@ export interface DatePickerEventFormData {
   selectedUserNames: string[]
   locations: ReadonlyArray<LocationDto>
   selectedLocation: LocationDto | null
-  todoId?: string
-  allDay: boolean
   start?: Date
   end?: Date
 }
-
-export const generateId = () =>
-  (Math.floor(Math.random() * 10000) + 1).toString()
 
 interface EventCalendarProps {
   meetings: ReadonlyArray<MeetingDto>
@@ -96,7 +86,6 @@ function EventCalendar({
 
   const [openSlot, setOpenSlot] = useState(false)
   const [openDatepickerModal, setOpenDatepickerModal] = useState(false)
-  const [openTodoModal, setOpenTodoModal] = useState(false)
   const [currentEvent, setCurrentEvent] = useState<Event | IEventInfo | null>(
     null
   )
@@ -105,14 +94,14 @@ function EventCalendar({
   const getUsersDtoByUserNames = (userNames: ReadonlyArray<string>) => {
     return users.filter((u) => userNames.includes(u.userName))
   }
-  const events = meetings
+
+  const initialEvents = meetings
     .filter((m) => m.schedules && m.schedules.length > 0)
     .flatMap((m) => {
       return m.schedules!.map((schedule) => {
         return {
           start: new Date(schedule.startDate),
           end: new Date(schedule.endDate),
-          allDay: false,
           todoId: m.id.toString(),
           _id: m.id.toString(),
           resource: null,
@@ -123,9 +112,36 @@ function EventCalendar({
       })
     })
 
-  const [showedEvents, setShowedEvents] = useState<IEventInfo[]>(events)
-  const [todos, setTodos] = useState<ITodo[]>([])
+  const [events, setEvents] = useState<IEventInfo[]>(initialEvents)
+  const [showedEvents, setShowedEvents] = useState<IEventInfo[]>(initialEvents)
+  const [filterMode, setFilterMode] = useState<MeetingsFilterMode>(
+    MeetingsFilterMode.TOTAL
+  )
 
+  useEffect(() => {
+    applyFilterMode(events)
+  }, [events, filterMode])
+
+  const applyFilterMode = (events: IEventInfo[]) => {
+    switch (filterMode) {
+      case MeetingsFilterMode.TOTAL:
+        setShowedEvents(events)
+        break
+      case MeetingsFilterMode.USER:
+        setShowedEvents(
+          events.filter((e) => e.users.map((user) => user.id).includes(user.id))
+        )
+        break
+      case MeetingsFilterMode.LOWER_COURT:
+        setShowedEvents(events.filter((e) => e.location.id === 2))
+        break
+      case MeetingsFilterMode.UPPER_COURT:
+        setShowedEvents(events.filter((e) => e.location.id === 1))
+        break
+      default:
+        throw new Error()
+    }
+  }
   const initialEventFormState = {
     notes: '',
     users: users,
@@ -144,8 +160,6 @@ function EventCalendar({
     selectedUserNames: accessLevel.createOther ? [] : [user.userName],
     locations: locations,
     selectedLocation: null,
-    todoId: undefined,
-    allDay: false,
     start: undefined,
     end: undefined,
   }
@@ -164,7 +178,7 @@ function EventCalendar({
     setEventInfoModal(true)
   }
 
-  const handleClose = () => {
+  const handleEventModalClose = () => {
     setEventFormData(initialEventFormState)
     setOpenSlot(false)
   }
@@ -193,8 +207,8 @@ function EventCalendar({
         selectedLocation,
         ...eventFormDataWithoutUsers
       } = eventFormData
-      const newEvents: IEventInfo[] = [
-        ...showedEvents,
+      const newEvents = [
+        ...events,
         {
           ...eventFormDataWithoutUsers,
           _id: meeting.id.toString(),
@@ -202,53 +216,49 @@ function EventCalendar({
           end: currentEvent?.end,
           users: getUsersDtoByUserNames(meeting.userNames),
           location: meeting.schedules![0].location,
+          notes: meeting.notes,
         },
       ]
-      setShowedEvents(newEvents)
-      handleClose()
+      setEvents(newEvents)
+      handleEventModalClose()
     })
   }
 
   const onAddEventFromDatePicker = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
 
-    const addHours = (date: Date | undefined, hours: number) => {
-      return date ? date.setHours(date.getHours() + hours) : undefined
-    }
-
-    const setMinToZero = (date: any) => {
+    const setSecondsToZero = (date: Date | undefined) => {
+      if (!date) {
+        return undefined
+      }
       date.setSeconds(0)
-
       return date
     }
     createMeeting({
       priceExcepted: 0,
       createdByExternalRefId: '1',
       schedule: {
-        startDate: setMinToZero(datePickerEventFormData.start),
-        endDate: datePickerEventFormData.allDay
-          ? addHours(datePickerEventFormData.start, 12)
-          : setMinToZero(datePickerEventFormData.end),
+        startDate: setSecondsToZero(datePickerEventFormData.start),
+        endDate: setSecondsToZero(datePickerEventFormData.end),
         locationId: datePickerEventFormData.selectedLocation!.id,
       },
       userNames: datePickerEventFormData.selectedUserNames,
       notes: datePickerEventFormData.notes,
     }).then((meeting) => {
-      const data: IEventInfo = {
-        ...datePickerEventFormData,
-        _id: meeting.id.toString(),
-        start: setMinToZero(datePickerEventFormData.start),
-        end: datePickerEventFormData.allDay
-          ? addHours(datePickerEventFormData.start, 12)
-          : setMinToZero(datePickerEventFormData.end),
-        users: getUsersDtoByUserNames(meeting.userNames),
-        location: meeting.schedules![0].location,
-      }
-
-      const newEvents = [...showedEvents, data]
-
-      setShowedEvents(newEvents)
+      const newEvents = [
+        ...events,
+        {
+          ...datePickerEventFormData,
+          _id: meeting.id.toString(),
+          start: setSecondsToZero(datePickerEventFormData.start),
+          end: setSecondsToZero(datePickerEventFormData.end),
+          users: getUsersDtoByUserNames(meeting.userNames),
+          location: meeting.schedules![0].location,
+        },
+      ]
+      setEvents(newEvents)
       setDatePickerEventFormData(initialDatePickerEventFormData)
+      handleDatePickerClose()
     })
   }
 
@@ -277,7 +287,7 @@ function EventCalendar({
     >
       <Container maxWidth={false}>
         <Card>
-          <CardHeader subheader="Create Events and Todos and manage them easily" />
+          <CardHeader subheader="Court Reservations Made Easy: Book and Manage Your Matches" />
           <Divider />
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -303,12 +313,9 @@ function EventCalendar({
                 aria-label="outlined primary button group"
               >
                 <Button
+                  id={'users-meetings'}
                   onClick={() => {
-                    setShowedEvents(
-                      events.filter((e) =>
-                        e.users.map((user) => user.id).includes(user.id)
-                      )
-                    )
+                    setFilterMode(MeetingsFilterMode.USER)
                   }}
                   size="medium"
                   variant="contained"
@@ -317,7 +324,7 @@ function EventCalendar({
                 </Button>
                 <Button
                   onClick={() => {
-                    setShowedEvents(events)
+                    setFilterMode(MeetingsFilterMode.TOTAL)
                   }}
                   size="medium"
                   variant="contained"
@@ -326,9 +333,7 @@ function EventCalendar({
                 </Button>
                 <Button
                   onClick={() => {
-                    setShowedEvents(
-                      events.filter((e) => e.location.name === 'location2')
-                    )
+                    setFilterMode(MeetingsFilterMode.UPPER_COURT)
                   }}
                   size="medium"
                   variant="contained"
@@ -338,9 +343,7 @@ function EventCalendar({
                 </Button>
                 <Button
                   onClick={() => {
-                    setShowedEvents(
-                      events.filter((e) => e.location.name === 'location1')
-                    )
+                    setFilterMode(MeetingsFilterMode.LOWER_COURT)
                   }}
                   size="medium"
                   variant="contained"
@@ -353,11 +356,10 @@ function EventCalendar({
             <Divider style={{ margin: 10 }} />
             <AddEventModal
               open={openSlot}
-              handleClose={handleClose}
+              handleClose={handleEventModalClose}
               eventFormData={eventFormData}
               setEventFormData={setEventFormData}
               onAddEvent={onAddEvent}
-              todos={todos}
             />
             <AddDatePickerEventModal
               open={openDatepickerModal}
@@ -365,7 +367,6 @@ function EventCalendar({
               datePickerEventFormData={datePickerEventFormData}
               setDatePickerEventFormData={setDatePickerEventFormData}
               onAddEvent={onAddEventFromDatePicker}
-              todos={todos}
             />
             <EventInfoModal
               open={eventInfoModal}
@@ -374,14 +375,6 @@ function EventCalendar({
               }}
               onDeleteEvent={onDeleteEvent}
               currentEvent={currentEvent as IEventInfo}
-            />
-            <AddTodoModal
-              open={openTodoModal}
-              handleClose={() => {
-                setOpenTodoModal(false)
-              }}
-              todos={todos}
-              setTodos={setTodos}
             />
             <Calendar
               localizer={localizer}

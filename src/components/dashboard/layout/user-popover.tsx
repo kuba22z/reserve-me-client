@@ -7,7 +7,6 @@ import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Popover from '@mui/material/Popover'
 import Typography from '@mui/material/Typography'
-import { GearSix as GearSixIcon } from '@phosphor-icons/react/dist/ssr/GearSix'
 import { SignOut as SignOutIcon } from '@phosphor-icons/react/dist/ssr/SignOut'
 import { User as UserIcon } from '@phosphor-icons/react/dist/ssr/User'
 
@@ -48,16 +47,6 @@ export function UserPopover({
         disablePadding
         sx={{ p: '8px', '& .MuiMenuItem-root': { borderRadius: 1 } }}
       >
-        <MenuItem
-          component={RouterLink}
-          href={paths.dashboard.settings}
-          onClick={onClose}
-        >
-          <ListItemIcon>
-            <GearSixIcon fontSize="var(--icon-fontSize-md)" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
         <MenuItem
           component={RouterLink}
           href={paths.dashboard.account}

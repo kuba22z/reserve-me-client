@@ -10,7 +10,7 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material'
-import { EventFormData, ITodo } from './EventCalendar'
+import { EventFormData } from './EventCalendar'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
@@ -22,7 +22,6 @@ interface IProps {
   eventFormData: EventFormData
   setEventFormData: Dispatch<SetStateAction<EventFormData>>
   onAddEvent: (e: MouseEvent<HTMLButtonElement>) => void
-  todos: ITodo[]
 }
 
 const AddEventModal = ({
@@ -31,7 +30,6 @@ const AddEventModal = ({
   eventFormData,
   setEventFormData,
   onAddEvent,
-  todos,
 }: IProps) => {
   const { selectedUserNames, users, selectedLocation, locations, notes } =
     eventFormData
@@ -46,13 +44,6 @@ const AddEventModal = ({
     }))
   }
 
-  const handleTodoChange = (e: React.SyntheticEvent, value: ITodo | null) => {
-    setEventFormData((prevState) => ({
-      ...prevState,
-      todoId: value?._id,
-    }))
-  }
-
   return (
     <Dialog fullScreen={fullScreen} open={open} onClose={onClose}>
       <DialogTitle>Add event</DialogTitle>
@@ -63,7 +54,6 @@ const AddEventModal = ({
         <Box component="form">
           <TextField
             name="notes"
-            value={notes}
             margin="dense"
             required={false}
             id="notes"
@@ -77,7 +67,7 @@ const AddEventModal = ({
             <Autocomplete
               multiple
               id="select-user-for-meeting"
-              options={users.map((u) => u)}
+              options={[...users]}
               getOptionLabel={(option) => option.name}
               getOptionKey={(option) => option.userName}
               onChange={(event, value, reason, details) =>

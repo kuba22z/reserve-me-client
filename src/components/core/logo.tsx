@@ -6,8 +6,8 @@ import { useColorScheme } from '@mui/material/styles'
 
 import { NoSsr } from '@/components/core/no-ssr'
 
-const HEIGHT = 60
-const WIDTH = 60
+const HEIGHT = 200
+const WIDTH = 100
 
 type Color = 'dark' | 'light'
 
@@ -36,7 +36,17 @@ export function Logo({
   }
 
   return (
-    <Box alt="logo" component="img" height={height} src={url} width={width} />
+    <Box
+      alt="logo"
+      sx={{
+        position: 'relative',
+        left: '24px', // Move 50px to the right
+      }}
+      component="img"
+      height={height}
+      src={'/assets/tennis-club.png'}
+      width={width}
+    />
   )
 }
 
