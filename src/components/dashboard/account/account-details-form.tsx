@@ -13,13 +13,6 @@ import OutlinedInput from '@mui/material/OutlinedInput'
 import Grid from '@mui/material/Unstable_Grid2'
 import { createUser } from '@/operations/user/create-user'
 
-const states = [
-  { value: 'alabama', label: 'Alabama' },
-  { value: 'new-york', label: 'New York' },
-  { value: 'san-francisco', label: 'San Francisco' },
-  { value: 'los-angeles', label: 'Los Angeles' },
-] as const
-
 interface AccountDetailsFormProps {
   handleClose?: () => void
 }
@@ -77,7 +70,7 @@ export function AccountDetailsForm({
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
-              <FormControl fullWidth>
+              <FormControl fullWidth required>
                 <InputLabel>Phone number</InputLabel>
                 <OutlinedInput
                   value={formState.phoneNumber}

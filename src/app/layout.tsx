@@ -4,8 +4,7 @@ import { ApolloWrapper } from '@/gql/apollo-wrapper'
 import { ThemeProvider } from '@/components/core/ThemeProvider'
 import { LocalizationProvider } from '@/components/core/localization-provider'
 import { UserProvider } from '@/components/core/UserProvider'
-import { GetUserDocument } from '@/gql/queries/get-user.generated'
-import { getClient } from '@/gql/client'
+import { getUser } from '@/operations/user/get-user'
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -17,15 +16,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const { data, error, errors, networkStatus } = await getClient().query({
-    query: GetUserDocument,
-  })
+  const user = await getUser()
   return (
     <html lang="en">
       <body>
         <ApolloWrapper>
           <LocalizationProvider>
-            <UserProvider user={data.user}>
+            <UserProvider user={user}>
               <ThemeProvider>{children}</ThemeProvider>
             </UserProvider>
           </LocalizationProvider>

@@ -4,22 +4,18 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 
 import { config } from '@/config'
-import { getClient } from '@/gql/client'
-import { GetUsersByGroupDocument } from '@/gql/queries/get-users-by-group.generated'
-import { CognitoGroupDto } from '@/gql/__generated__/types'
 import { UsersTable } from '@/components/dashboard/users/users-table'
 import { UserOperations } from '@/components/dashboard/users/user-operations'
 import { isMobileDevice } from '@/lib/isMobileDevice'
+import { getUsersByGroup } from '@/operations/user/get-users-by-group'
+import { CognitoGroupDto } from '@/gql/__generated__/types'
 
 export const metadata = {
   title: `Users | Dashboard | ${config.site.name}`,
 } satisfies Metadata
 
 export default async function Page(): Promise<React.JSX.Element> {
-  const { data, error } = await getClient().query({
-    query: GetUsersByGroupDocument,
-    variables: { group: CognitoGroupDto.Client },
-  })
+  const usersByGroup = await getUsersByGroup(CognitoGroupDto.Client)
 
   return (
     <>
@@ -30,7 +26,7 @@ export default async function Page(): Promise<React.JSX.Element> {
             <UserOperations isMobile={await isMobileDevice()} />
           </Stack>
         </Stack>
-        <UsersTable users={data.usersByGroup} />
+        <UsersTable users={usersByGroup} />
       </Stack>
     </>
   )
