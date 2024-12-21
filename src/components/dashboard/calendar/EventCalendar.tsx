@@ -166,8 +166,9 @@ function EventCalendar({
   const [datePickerEventFormData, setDatePickerEventFormData] =
     useState<DatePickerEventFormData>(initialDatePickerEventFormData)
 
-  const upperCourtColor = '#ff9800'
-  const lowerCourtColor = '#8bc34a'
+  const upperCourtColor = '#ffa700'
+  const lowerCourtColor = '#82c331'
+  const totalCourtColor = '#ca1d1d'
   const handleSelectSlot = (event: Event) => {
     setOpenSlot(true)
     setCurrentEvent(event)
@@ -287,7 +288,7 @@ function EventCalendar({
     >
       <Container maxWidth={false}>
         <Card>
-          <CardHeader subheader="Court Reservations Made Easy: Book and Manage Your Matches" />
+          <CardHeader subheader="Tennis Court Reservations Made Easy: Book and Manage Your Matches" />
           <Divider />
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -309,7 +310,6 @@ function EventCalendar({
               </ButtonGroup>
               <ButtonGroup
                 size="medium"
-                variant="contained"
                 aria-label="outlined primary button group"
               >
                 <Button
@@ -328,6 +328,7 @@ function EventCalendar({
                   }}
                   size="medium"
                   variant="contained"
+                  style={{ backgroundColor: totalCourtColor }}
                 >
                   Total
                 </Button>
@@ -388,9 +389,7 @@ function EventCalendar({
               defaultView={Views.WEEK}
               eventPropGetter={(event) => {
                 const color =
-                  event.location.name === 'Upper Court'
-                    ? upperCourtColor
-                    : lowerCourtColor
+                  event.location.id === 1 ? upperCourtColor : lowerCourtColor
                 return {
                   style: {
                     backgroundColor: color,
