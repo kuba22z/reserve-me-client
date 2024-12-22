@@ -1,7 +1,8 @@
 import { create } from 'zustand'
-import { addLocation, getLocations } from '@/operations/locationOperations'
 import { LocationDto } from '@/gql/__generated__/types'
 import { CreateLocationMutation } from '@/gql/queries/create-location.generated'
+import { getLocations } from '@/operations/location/get-locations'
+import { createLocation } from '@/operations/location/create-location'
 
 interface LocationState {
   locations: LocationDto[]
@@ -18,7 +19,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
       set({ locations: [...a] })
     }),
   addLocation2: async () =>
-    addLocation().then((a) => {
+    createLocation().then((a) => {
       set((state) => ({
         locations: [a.data!.createLocation, ...state.locations],
       }))

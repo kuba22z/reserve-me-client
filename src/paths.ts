@@ -10,4 +10,5 @@ export const paths = {
     account: '/dashboard/account',
     users: '/dashboard/users',
   },
+  errors: { notFound: '/errors/not-found' },
 } as const

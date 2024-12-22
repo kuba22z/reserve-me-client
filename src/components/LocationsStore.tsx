@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect } from 'react'
-import { useLocationStore } from '@/operations/locationStore'
+import { useLocationStore } from '@/operations/location/locationStore'
 import { LocationDto } from '@/gql/__generated__/types'
 
 export function LocationsStore() {

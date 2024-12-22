@@ -1,5 +1,5 @@
 'use client'
-import { useLocationStore } from '@/operations/locationStore'
+import { useLocationStore } from '@/operations/location/locationStore'
 import { Button } from '@mui/material'
 
 export default function MyxButtonStore({

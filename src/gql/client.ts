@@ -28,7 +28,6 @@ const authMiddleware = new ApolloLink((operation, forward) => {
     })
   ).flatMap((accessToken) => {
     if (!accessToken) {
-      // Terminate the request by returning an empty Observable
       console.error('Access token in auth middleware is null')
       return new Observable((observer) => {
         observer.error(new Error('Request terminated: Missing access token'))

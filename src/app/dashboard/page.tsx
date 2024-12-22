@@ -7,7 +7,7 @@ import SwitchMobileComponent from '@/components/common/SwitchMobileComponent'
 import EventCalendarMobile from '@/components/dashboard/calendar/EventCalendarMobile'
 import { getUsers } from '@/operations/user/get-users'
 import { getMeetings } from '@/operations/meeting/get-meetings'
-import { getLocations } from '@/operations/locationOperations'
+import { getLocations } from '@/operations/location/get-locations'
 
 export const metadata = {
   title: `Overview | Dashboard | ${config.site.name}`,

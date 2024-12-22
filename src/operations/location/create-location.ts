@@ -1,11 +1,10 @@
-import { UpdateLocationDocument } from '@/gql/queries/update-location.generated'
 import { getClient } from '@/gql/client'
 import {
   CreateLocationDocument,
   LocationFragmentFragmentDoc,
 } from '@/gql/queries/create-location.generated'
 
-export async function addLocation() {
+export async function createLocation() {
   const newCity = 'test123'
   const d = {
     city: newCity,
@@ -34,14 +33,6 @@ export async function addLocation() {
         },
       })
     },
-  })
-  return { data }
-}
-
-export async function updateLocation() {
-  const { data } = await getClient().mutate({
-    mutation: UpdateLocationDocument,
-    variables: { location: { id: 1, city: 'my New21312321213 City' } },
   })
   return { data }
 }
