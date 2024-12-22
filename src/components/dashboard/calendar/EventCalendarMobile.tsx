@@ -21,6 +21,7 @@ import AddIcon from '@mui/icons-material/Add'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction/BottomNavigationAction'
 import { MeetingsFilterMode } from '@/components/dashboard/calendar/FilterMode'
 import {
+  determineColor,
   EventCalendarProps,
   IEventInfo,
   lowerCourtColor,
@@ -145,8 +146,7 @@ function EventCalendarMobile({
         defaultView={Views.DAY}
         views={[Views.DAY]}
         eventPropGetter={(event) => {
-          const color =
-            event.location.id === 1 ? upperCourtColor : lowerCourtColor
+          const color = determineColor(event)
           return {
             style: {
               backgroundColor: color,

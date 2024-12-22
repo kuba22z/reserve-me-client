@@ -23,7 +23,9 @@ export const useEvents = (initialEvents: IEventInfo[]) => {
         break
       case MeetingsFilterMode.USER:
         setShowedEvents(
-          events.filter((e) => e.users.map((user) => user.id).includes(user.id))
+          events.filter((e) =>
+            e.users ? e.users.map((user) => user.id).includes(user.id) : false
+          )
         )
         break
       case MeetingsFilterMode.LOWER_COURT:

@@ -9,7 +9,7 @@ const EventInfo = ({ event }: IProps) => {
   return (
     <>
       <Typography sx={{ lineHeight: '1.25' }}>
-        {event.users.map((a) => a.name).join(',')}
+        {event.users ? event.users.map((u) => u.name).join(',') : 'reserved'}
       </Typography>
       <Typography sx={{ lineHeight: '1.25' }}>{event.location.name}</Typography>
     </>

@@ -8,7 +8,8 @@ export const getMeetings = async (): Promise<ReadonlyArray<MeetingDto>> => {
   const user = await getUser()
   if (
     user.groups.some(
-      (group) => group == CognitoGroupDto.Admin || CognitoGroupDto.Employee
+      (group) =>
+        group === CognitoGroupDto.Admin || group === CognitoGroupDto.Employee
     )
   ) {
     const { data, error, errors, networkStatus } = await getClient().query({

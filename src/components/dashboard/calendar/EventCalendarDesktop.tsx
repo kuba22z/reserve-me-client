@@ -30,6 +30,7 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus'
 import { MeetingsFilterMode } from '@/components/dashboard/calendar/FilterMode'
 import AddEventModal from '@/components/dashboard/calendar/AddEventModal'
 import {
+  determineColor,
   EventCalendarProps,
   IEventInfo,
   lowerCourtColor,
@@ -188,8 +189,7 @@ function EventCalendarDesktop({
               endAccessor="end"
               defaultView={Views.WEEK}
               eventPropGetter={(event) => {
-                const color =
-                  event.location.id === 1 ? upperCourtColor : lowerCourtColor
+                const color = determineColor(event)
                 return {
                   style: {
                     backgroundColor: color,
