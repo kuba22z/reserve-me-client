@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Dispatch, MouseEvent, SetStateAction } from 'react'
+import React, { ChangeEvent, MouseEvent, useState } from 'react'
 import {
   Autocomplete,
   Box,
@@ -10,38 +10,96 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material'
-import { EventFormData } from './EventCalendar'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
 import { DashboardAccessLevels } from '@/role-permissions'
+import { LocationDto, UserDto } from '@/gql/__generated__/types'
+import {
+  getUsersDtoByUserNames,
+  IEventInfo,
+} from '@/components/dashboard/calendar/EventCalendarUtils'
+import { useUserContext } from '@/components/core/UserProvider'
+import { createMeeting } from '@/operations/meeting/create-meetings'
 
 interface IProps {
   open: boolean
-  handleClose: Dispatch<SetStateAction<void>>
-  eventFormData: EventFormData
-  setEventFormData: Dispatch<SetStateAction<EventFormData>>
-  onAddEvent: (e: MouseEvent<HTMLButtonElement>) => void
+  users: ReadonlyArray<UserDto>
+  locations: ReadonlyArray<LocationDto>
+  currentEvent: IEventInfo
+  onAddEvent: (e: IEventInfo) => void
+  close: () => void
+}
+
+interface AddEventFormData {
+  notes: string
+  selectedUserNames: string[]
+  selectedLocation: LocationDto | null
+  start?: Date
+  end?: Date
 }
 
 const AddEventModal = ({
-  open,
-  handleClose,
-  eventFormData,
-  setEventFormData,
+  users,
+  locations,
   onAddEvent,
+  open,
+  close,
+  currentEvent,
 }: IProps) => {
-  const { selectedUserNames, users, selectedLocation, locations, notes } =
-    eventFormData
   const theme = useTheme()
+  const user = useUserContext()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
-  const onClose = () => handleClose()
   const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
+
+  const initialDatePickerEventFormData: AddEventFormData = {
+    notes: '',
+    selectedUserNames: accessLevel.createOther ? [] : [user.userName],
+    selectedLocation: null,
+    start: undefined,
+    end: undefined,
+  }
+
+  const [eventFormData, setEventFormData] = useState<AddEventFormData>(
+    initialDatePickerEventFormData
+  )
+  const { selectedUserNames, selectedLocation, notes } = eventFormData
+
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setEventFormData((prevState) => ({
       ...prevState,
       [event.target.name]: event.target.value,
     }))
+  }
+  const onClose = () => {
+    setEventFormData(initialDatePickerEventFormData)
+    close()
+  }
+
+  const createEvent = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    createMeeting({
+      priceExcepted: 0,
+      createdByExternalRefId: '1',
+      schedule: {
+        startDate: currentEvent?.start,
+        endDate: currentEvent?.end,
+        locationId: eventFormData.selectedLocation!.id,
+      },
+      userNames: selectedUserNames,
+      notes: notes,
+    }).then((meeting) => {
+      onAddEvent({
+        ...eventFormData,
+        _id: meeting.id.toString(),
+        start: currentEvent?.start,
+        end: currentEvent?.end,
+        users: getUsersDtoByUserNames(users, meeting.userNames),
+        location: meeting.schedules![0].location,
+        notes: meeting.notes ?? undefined,
+      })
+      onClose()
+    })
   }
 
   return (
@@ -112,7 +170,7 @@ const AddEventModal = ({
         <Button
           disabled={selectedUserNames.length === 0 || selectedLocation === null}
           color="success"
-          onClick={onAddEvent}
+          onClick={createEvent}
         >
           Add
         </Button>

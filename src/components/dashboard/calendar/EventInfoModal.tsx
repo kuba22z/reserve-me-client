@@ -1,4 +1,4 @@
-import { Dispatch, MouseEvent, SetStateAction } from 'react'
+import { Dispatch, SetStateAction } from 'react'
 import {
   Button,
   Dialog,
@@ -7,15 +7,16 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material'
-import { IEventInfo } from './EventCalendar'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
 import { DashboardAccessLevels } from '@/role-permissions'
 import { useUserContext } from '@/components/core/UserProvider'
+import { deleteMeetings } from '@/operations/meeting/delete-meetings'
+import { IEventInfo } from '@/components/dashboard/calendar/EventCalendarUtils'
 
 interface IProps {
   open: boolean
   handleClose: Dispatch<SetStateAction<void>>
-  onDeleteEvent: (e: MouseEvent<HTMLButtonElement>) => void
+  onDeleteEvent: (e: IEventInfo) => void
   currentEvent: IEventInfo | null
 }
 
@@ -29,6 +30,17 @@ const EventInfoModal = ({
   const user = useUserContext()
   const onClose = () => {
     handleClose()
+  }
+
+  const deleteEvent = () => {
+    const currentEventInfo = currentEvent as IEventInfo
+    deleteMeetings([parseInt(currentEventInfo._id)]).then((count) => {
+      if (count.count === 1) {
+        onDeleteEvent(currentEventInfo)
+      } else {
+        throw Error('Meeting could not be deleted')
+      }
+    })
   }
 
   return (
@@ -75,7 +87,7 @@ const EventInfoModal = ({
           currentEvent.users
             .map((user) => user.userName)
             .includes(user.userName)) ? (
-          <Button color="info" onClick={onDeleteEvent}>
+          <Button color="info" onClick={deleteEvent}>
             Delete Event
           </Button>
         ) : (

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Dispatch, MouseEvent, SetStateAction } from 'react'
+import React, { ChangeEvent, MouseEvent, useState } from 'react'
 import {
   Autocomplete,
   Box,
@@ -12,42 +12,59 @@ import {
 } from '@mui/material'
 
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers'
-import { DatePickerEventFormData } from './EventCalendar'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
 import { DashboardAccessLevels } from '@/role-permissions'
+import { createMeeting } from '@/operations/meeting/create-meetings'
+import {
+  getUsersDtoByUserNames,
+  IEventInfo,
+} from '@/components/dashboard/calendar/EventCalendarUtils'
+import { LocationDto, UserDto } from '@/gql/__generated__/types'
+import { useUserContext } from '@/components/core/UserProvider'
 
 interface IProps {
   open: boolean
-  handleClose: Dispatch<SetStateAction<void>>
-  datePickerEventFormData: DatePickerEventFormData
-  setDatePickerEventFormData: Dispatch<SetStateAction<DatePickerEventFormData>>
-  onAddEvent: (e: MouseEvent<HTMLButtonElement>) => void
+  users: ReadonlyArray<UserDto>
+  locations: ReadonlyArray<LocationDto>
+  onAddEvent: (e: IEventInfo) => void
+  close: () => void
+}
+
+interface DatePickerEventFormData {
+  notes: string
+  selectedUserNames: string[]
+  selectedLocation: LocationDto | null
+  start?: Date
+  end?: Date
 }
 
 const AddDatePickerEventModal = ({
-  open,
-  handleClose,
-  datePickerEventFormData,
-  setDatePickerEventFormData,
+  users,
+  locations,
   onAddEvent,
+  open,
+  close,
 }: IProps) => {
-  const {
-    users,
-    selectedUserNames,
-    locations,
-    selectedLocation,
-    start,
-    end,
-    notes,
-  } = datePickerEventFormData
   const theme = useTheme()
+  const user = useUserContext()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
-  const onClose = () => {
-    handleClose()
+  const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
+
+  const initialDatePickerEventFormData: DatePickerEventFormData = {
+    notes: '',
+    selectedUserNames: accessLevel.createOther ? [] : [user.userName],
+    selectedLocation: null,
+    start: undefined,
+    end: undefined,
   }
+
+  const [datePickerEventFormData, setDatePickerEventFormData] =
+    useState<DatePickerEventFormData>(initialDatePickerEventFormData)
+  const { selectedUserNames, selectedLocation, start, end, notes } =
+    datePickerEventFormData
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setDatePickerEventFormData((prevState) => ({
@@ -55,7 +72,6 @@ const AddDatePickerEventModal = ({
       [event.target.name]: event.target.value,
     }))
   }
-  const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
 
   const isDisabled = () => {
     const checkend = () => {
@@ -69,6 +85,41 @@ const AddDatePickerEventModal = ({
       start === null ||
       checkend()
     )
+  }
+  const onClose = () => {
+    close()
+    setDatePickerEventFormData(initialDatePickerEventFormData)
+  }
+
+  const createEvent = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+
+    const setMinToZero = (date: any) => {
+      date.setSeconds(0)
+      return date
+    }
+    createMeeting({
+      priceExcepted: 0,
+      createdByExternalRefId: '1',
+      schedule: {
+        startDate: setMinToZero(start),
+        endDate: setMinToZero(end),
+        locationId: selectedLocation!.id,
+      },
+      userNames: selectedUserNames,
+      notes: notes,
+    }).then((meeting) => {
+      onAddEvent({
+        ...datePickerEventFormData,
+        _id: meeting.id.toString(),
+        start: setMinToZero(start),
+        end: setMinToZero(end),
+        users: getUsersDtoByUserNames(users, meeting.userNames),
+        location: meeting.schedules![0].location,
+      })
+      setDatePickerEventFormData(datePickerEventFormData)
+      onClose()
+    })
   }
 
   return (
@@ -152,12 +203,17 @@ const AddDatePickerEventModal = ({
               minutesStep={30}
               ampm={true}
               value={end ?? null}
-              onChange={(newValue) =>
+              onChange={(newValue) => {
+                const selectedDate = newValue ? new Date(newValue) : undefined
+                if (selectedDate && start && selectedDate <= start) {
+                  alert('End date cannot be before start date!')
+                  return
+                }
                 setDatePickerEventFormData((prevState) => ({
                   ...prevState,
-                  end: newValue ? new Date(newValue) : undefined,
+                  end: selectedDate,
                 }))
-              }
+              }}
             />
           </LocalizationProvider>
         </Box>
@@ -166,7 +222,7 @@ const AddDatePickerEventModal = ({
         <Button color="error" onClick={onClose}>
           Cancel
         </Button>
-        <Button disabled={isDisabled()} color="success" onClick={onAddEvent}>
+        <Button disabled={isDisabled()} color="success" onClick={createEvent}>
           Add
         </Button>
       </DialogActions>

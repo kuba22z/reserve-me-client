@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material'
-import { IEventInfo } from './EventCalendar'
+import { IEventInfo } from '@/components/dashboard/calendar/EventCalendarUtils'
 
 interface IProps {
   event: IEventInfo

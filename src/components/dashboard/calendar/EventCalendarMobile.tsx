@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { MouseEvent, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button, ButtonGroup, Divider } from '@mui/material'
 import {
   Calendar,
@@ -15,17 +15,19 @@ import AddEventModal from './AddEventModal'
 import EventInfoModal from './EventInfoModal'
 import AddDatePickerEventModal from './AddDatePickerEventModal'
 import 'moment/locale/de'
-import { LocationDto, MeetingDto, UserDto } from '@/gql/__generated__/types'
 import EventInfo from '@/components/dashboard/calendar/EventInfo'
-import { useUserContext } from '@/components/core/UserProvider'
 import { BottomNav } from '@/components/dashboard/layout/bottom-nav'
 import AddIcon from '@mui/icons-material/Add'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction/BottomNavigationAction'
-import { createMeeting } from '@/operations/meeting/create-meetings'
-import { deleteMeetings } from '@/operations/meeting/delete-meetings'
-import useUserRoleAccessLevel from '@/hooks/use-user-role-access-level'
-import { DashboardAccessLevels } from '@/role-permissions'
-import { MeetingsFilterMode } from '@/components/dashboard/calendar/FilterMode' // const locales = {
+import { MeetingsFilterMode } from '@/components/dashboard/calendar/FilterMode'
+import {
+  EventCalendarProps,
+  IEventInfo,
+  lowerCourtColor,
+  totalCourtColor,
+  upperCourtColor,
+} from '@/components/dashboard/calendar/EventCalendarUtils'
+import { useEvents } from '@/components/dashboard/calendar/useEvents' // const locales = {
 
 // const locales = {
 //   "en-US": enUS,
@@ -33,239 +35,29 @@ import { MeetingsFilterMode } from '@/components/dashboard/calendar/FilterMode' 
 // Set the IANA time zone you want to use
 //moment.tz.setDefault('Europe/Paris')
 const localizer = momentLocalizer(moment) // or globalizeLocalizer
-export interface IEventInfo extends Event {
-  _id: string
-  users: UserDto[]
-  location: LocationDto
-  todoId?: string
-  notes: string
-}
-
-export interface EventFormData {
-  notes: string
-  users: ReadonlyArray<UserDto>
-  locations: ReadonlyArray<LocationDto>
-  selectedLocation: LocationDto | null
-  selectedUserNames: string[]
-  todoId?: string
-}
-
-export interface DatePickerEventFormData {
-  notes: string
-  users: ReadonlyArray<UserDto>
-  selectedUserNames: string[]
-  locations: ReadonlyArray<LocationDto>
-  selectedLocation: LocationDto | null
-  todoId?: string
-  start?: Date
-  end?: Date
-}
-
-interface EventCalendarProps {
-  meetings: ReadonlyArray<MeetingDto>
-  users: ReadonlyArray<UserDto>
-  locations: ReadonlyArray<LocationDto>
-}
 
 function EventCalendarMobile({
-  meetings,
+  initialEvents,
   locations,
   users,
 }: Readonly<EventCalendarProps>) {
-  const user = useUserContext()
-  const [openSlot, setOpenSlot] = useState(false)
+  const [openEventModal, setOpenEventModal] = useState(false)
   const [openDatepickerModal, setOpenDatepickerModal] = useState(false)
   const [currentEvent, setCurrentEvent] = useState<Event | IEventInfo | null>(
     null
   )
-  const accessLevel = useUserRoleAccessLevel() as DashboardAccessLevels
+  const [openEventInfoModal, setOpenEventInfoModal] = useState(false)
+  const { events, setEvents, showedEvents, setShowedEvents, setFilterMode } =
+    useEvents(initialEvents)
 
-  const [eventInfoModal, setEventInfoModal] = useState(false)
-
-  const getUsersDtoByUserNames = (userNames: ReadonlyArray<string>) => {
-    return users.filter((u) => userNames.includes(u.userName))
-  }
-
-  const initialEvents = meetings
-    .filter((m) => m.schedules && m.schedules.length > 0)
-    .flatMap((m) => {
-      return m.schedules!.map((schedule) => {
-        return {
-          start: new Date(schedule.startDate),
-          end: new Date(schedule.endDate),
-          todoId: m.id.toString(),
-          _id: m.id.toString(),
-          resource: null,
-          users: getUsersDtoByUserNames(m.userNames),
-          location: schedule.location,
-          notes: m.notes,
-        }
-      })
-    })
-
-  const [events, setEvents] = useState<IEventInfo[]>(initialEvents)
-  const [showedEvents, setShowedEvents] = useState<IEventInfo[]>(initialEvents)
-  const [filterMode, setFilterMode] = useState<MeetingsFilterMode>(
-    MeetingsFilterMode.TOTAL
-  )
-
-  useEffect(() => {
-    applyFilterMode(events)
-  }, [events, filterMode])
-
-  const applyFilterMode = (events: IEventInfo[]) => {
-    switch (filterMode) {
-      case MeetingsFilterMode.TOTAL:
-        setShowedEvents(events)
-        break
-      case MeetingsFilterMode.USER:
-        setShowedEvents(
-          events.filter((e) => e.users.map((user) => user.id).includes(user.id))
-        )
-        break
-      case MeetingsFilterMode.LOWER_COURT:
-        setShowedEvents(events.filter((e) => e.location.id === 2))
-        break
-      case MeetingsFilterMode.UPPER_COURT:
-        setShowedEvents(events.filter((e) => e.location.id === 1))
-        break
-      default:
-        throw new Error()
-    }
-  }
-
-  const initialEventFormState = {
-    notes: '',
-    users: users,
-    selectedUserNames: accessLevel.createOther ? [] : [user.userName],
-    locations: locations,
-    selectedLocation: null,
-    todoId: undefined,
-  }
-  const [eventFormData, setEventFormData] = useState<EventFormData>(
-    initialEventFormState
-  )
-
-  const initialDatePickerEventFormData: DatePickerEventFormData = {
-    notes: '',
-    users: users,
-    selectedUserNames: accessLevel.createOther ? [] : [user.userName],
-    locations: locations,
-    selectedLocation: null,
-    todoId: undefined,
-    start: undefined,
-    end: undefined,
-  }
-
-  const [datePickerEventFormData, setDatePickerEventFormData] =
-    useState<DatePickerEventFormData>(initialDatePickerEventFormData)
-
-  const upperCourtColor = '#ffa700'
-  const lowerCourtColor = '#82c331'
-  const totalCourtColor = '#ca1d1d'
   const handleSelectSlot = (event: Event) => {
-    setOpenSlot(true)
+    setOpenEventModal(true)
     setCurrentEvent(event)
   }
 
   const handleSelectEvent = (event: IEventInfo) => {
     setCurrentEvent(event)
-    setEventInfoModal(true)
-  }
-
-  const handleClose = () => {
-    setEventFormData(initialEventFormState)
-    setOpenSlot(false)
-  }
-
-  const handleDatePickerClose = () => {
-    setDatePickerEventFormData(initialDatePickerEventFormData)
-    setOpenDatepickerModal(false)
-  }
-
-  const onAddEvent = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    createMeeting({
-      priceExcepted: 0,
-      createdByExternalRefId: '1',
-      schedule: {
-        startDate: currentEvent?.start,
-        endDate: currentEvent?.end,
-        locationId: eventFormData.selectedLocation!.id,
-      },
-      userNames: eventFormData.selectedUserNames,
-      notes: eventFormData.notes,
-    }).then((meeting) => {
-      const {
-        selectedUserNames,
-        users,
-        selectedLocation,
-        ...eventFormDataWithoutUsers
-      } = eventFormData
-      const newEvents = [
-        ...events,
-        {
-          ...eventFormDataWithoutUsers,
-          _id: meeting.id.toString(),
-          start: currentEvent?.start,
-          end: currentEvent?.end,
-          users: getUsersDtoByUserNames(meeting.userNames),
-          location: meeting.schedules![0].location,
-          notes: meeting.notes,
-        },
-      ]
-      setEvents(newEvents)
-      handleClose()
-    })
-  }
-
-  const onAddEventFromDatePicker = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-
-    const setMinToZero = (date: any) => {
-      date.setSeconds(0)
-      return date
-    }
-    createMeeting({
-      priceExcepted: 0,
-      createdByExternalRefId: '1',
-      schedule: {
-        startDate: setMinToZero(datePickerEventFormData.start),
-        endDate: setMinToZero(datePickerEventFormData.end),
-        locationId: datePickerEventFormData.selectedLocation!.id,
-      },
-      userNames: datePickerEventFormData.selectedUserNames,
-      notes: datePickerEventFormData.notes,
-    }).then((meeting) => {
-      const newEvents = [
-        ...events,
-        {
-          ...datePickerEventFormData,
-          _id: meeting.id.toString(),
-          start: setMinToZero(datePickerEventFormData.start),
-          end: setMinToZero(datePickerEventFormData.end),
-          users: getUsersDtoByUserNames(meeting.userNames),
-          location: meeting.schedules![0].location,
-        },
-      ]
-      setEvents(newEvents)
-      setDatePickerEventFormData(initialDatePickerEventFormData)
-      handleDatePickerClose()
-    })
-  }
-
-  const onDeleteEvent = () => {
-    const currentEventInfo = currentEvent as IEventInfo
-    deleteMeetings([parseInt(currentEventInfo._id)]).then((count) => {
-      if (count.count === 1) {
-        setShowedEvents(() =>
-          [...showedEvents].filter((e) => e._id !== currentEventInfo._id)
-        )
-        setEventInfoModal(false)
-      } else {
-        throw Error('Meeting could not be deleted')
-      }
-    })
+    setOpenEventInfoModal(true)
   }
   return (
     <>
@@ -314,25 +106,30 @@ function EventCalendarMobile({
       </ButtonGroup>
       <Divider style={{ margin: 10 }} />
       <AddEventModal
-        open={openSlot}
-        handleClose={handleClose}
-        eventFormData={eventFormData}
-        setEventFormData={setEventFormData}
-        onAddEvent={onAddEvent}
+        open={openEventModal}
+        users={users}
+        locations={locations}
+        onAddEvent={(e) => setEvents([...events, e])}
+        close={() => setOpenEventModal(false)}
+        currentEvent={currentEvent as IEventInfo}
       />
       <AddDatePickerEventModal
         open={openDatepickerModal}
-        handleClose={handleDatePickerClose}
-        datePickerEventFormData={datePickerEventFormData}
-        setDatePickerEventFormData={setDatePickerEventFormData}
-        onAddEvent={onAddEventFromDatePicker}
+        users={users}
+        locations={locations}
+        onAddEvent={(e) => setEvents([...events, e])}
+        close={() => setOpenDatepickerModal(false)}
       />
       <EventInfoModal
-        open={eventInfoModal}
+        open={openEventInfoModal}
         handleClose={() => {
-          setEventInfoModal(false)
+          setOpenEventInfoModal(false)
         }}
-        onDeleteEvent={onDeleteEvent}
+        onDeleteEvent={(currentEventInfo) => {
+          setShowedEvents(() =>
+            [...showedEvents].filter((e) => e._id !== currentEventInfo._id)
+          )
+        }}
         currentEvent={currentEvent as IEventInfo}
       />
       <Calendar
