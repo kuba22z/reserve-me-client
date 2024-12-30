@@ -25,9 +25,9 @@ export namespace RolePermissions {
           const allPaths = Object.keys(accessLevels)
           if (!allPaths.includes(path)) {
             throw Error(
-              'The pathname' +
+              'The pathname ' +
                 path +
-                'is unknown. The access level cant be determined'
+                ' is unknown. The access level cant be determined'
             )
           }
           type AllPathTypes = keyof typeof accessLevels

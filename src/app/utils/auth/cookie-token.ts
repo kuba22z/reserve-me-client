@@ -13,7 +13,7 @@ export namespace CookieToken {
     // default expires in = 60 minutes
     await set('accessToken', credentials.accessToken, credentials.expiresIn)
     if (credentials.refreshToken) {
-      set('refreshToken', credentials.refreshToken, ThirtyDaysInSec)
+      await set('refreshToken', credentials.refreshToken, ThirtyDaysInSec)
     }
     await set('idToken', credentials.idToken, credentials.expiresIn)
     await setTokenRole(credentials.groups)
@@ -56,6 +56,13 @@ export namespace CookieToken {
       'accessToken',
       credentials.accessToken,
       credentials.expiresIn
+    )
+    response.cookies.set(
+      cookieConfig(
+        TokenRoleKey,
+        cognitoGroupDtoToString(credentials.groups),
+        ThirtyDaysInSec
+      )
     )
   }
 
@@ -111,7 +118,7 @@ export namespace CookieToken {
   }
 
   const cookieConfig = (
-    key: CookieTokenKey,
+    key: CookieTokenKey | typeof TokenRoleKey,
     value: string,
     maxAgeInSec: number
   ): ResponseCookie => {
