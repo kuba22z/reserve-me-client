@@ -15,7 +15,7 @@ export default async function Home() {
           alignItems: 'center',
         }}
       >
-        <DashboardLink></DashboardLink>
+        <DashboardLink />
         <h3>Location Store</h3>
         {/*<LocationsStore></LocationsStore>*/}
         <FormControl></FormControl>
