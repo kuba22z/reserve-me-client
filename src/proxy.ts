@@ -10,7 +10,7 @@ import Negotiator from 'negotiator'
 import { defaultLocale, Paths, paths, supportedLanguages } from '@/paths'
 
 // This function can be marked `async` if using `await` inside
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   if (pathname.startsWith('/auth/token')) {
     const code = searchParams.get('code')

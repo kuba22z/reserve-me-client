@@ -1,6 +1,7 @@
-import { Box, Container, FormControl, Link } from '@mui/material'
-import NextLink from 'next/link'
+'use server'
+import { Box, Container, FormControl } from '@mui/material'
 import React from 'react'
+import DashboardLink from '@/app/[lang]/dashboard-link'
 
 export default async function Home() {
   return (
@@ -14,9 +15,7 @@ export default async function Home() {
           alignItems: 'center',
         }}
       >
-        <Link href="/dashboard" color="secondary" component={NextLink}>
-          Go to the dashboard
-        </Link>
+        <DashboardLink></DashboardLink>
         <h3>Location Store</h3>
         {/*<LocationsStore></LocationsStore>*/}
         <FormControl></FormControl>
