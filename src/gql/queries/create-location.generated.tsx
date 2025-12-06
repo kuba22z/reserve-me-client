@@ -1,0 +1,14 @@
+import * as Types from '@/gql/__generated__/types';
+
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type CreateLocationMutationVariables = Types.Exact<{
+  location: Types.CreateLocationDto;
+}>;
+
+
+export type CreateLocationMutation = { readonly __typename?: 'Mutation', readonly createLocation: { readonly __typename?: 'LocationDto', readonly id: number, readonly postalCode: string, readonly city: string, readonly street: string, readonly houseNumber: number, readonly name: string } };
+
+export type LocationFragmentFragment = { readonly __typename?: 'LocationDto', readonly id: number, readonly postalCode: string, readonly name: string, readonly houseNumber: number, readonly city: string, readonly street: string };
+
+export const LocationFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"locationFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"LocationDto"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"houseNumber"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"city"}},{"kind":"Field","name":{"kind":"Name","value":"street"}}]}}]} as unknown as DocumentNode<LocationFragmentFragment, unknown>;
+export const CreateLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"location"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateLocationDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"location"},"value":{"kind":"Variable","name":{"kind":"Name","value":"location"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"city"}},{"kind":"Field","name":{"kind":"Name","value":"street"}},{"kind":"Field","name":{"kind":"Name","value":"houseNumber"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<CreateLocationMutation, CreateLocationMutationVariables>;

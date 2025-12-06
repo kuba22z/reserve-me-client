@@ -37,7 +37,3 @@ next-env.d.ts
 
 # IDE
 .idea
-
-#Graphql
-**/__generated__
-*.generated*
