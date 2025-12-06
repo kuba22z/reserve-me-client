@@ -2,11 +2,7 @@ import { Box, Container, FormControl, Link } from '@mui/material'
 import NextLink from 'next/link'
 import React from 'react'
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { code: string | undefined }
-}) {
+export default async function Home() {
   return (
     <Container maxWidth="lg">
       <Box
