@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "yarn generate && next build",
+    "build": "next build",
     "start:prod": "next start -p 4200",
     "start:local": "concurrently \"NODE_OPTIONS='--inspect' NODE_ENV=development next dev -p 4200\" \"yarn generate --watch\"",
     "start:dev": "NODE_OPTIONS='--inspect' NODE_ENV=test next dev -p 4200",
     "generate": "graphql-codegen",
-    "prebuild": "yarn generate",
     "lint": "next lint"
   },
   "dependencies": {
